@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b6bcb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Roster">
+<title>Transport Roster</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f4f6f9;--card:#fff;--ink:#14202e;--muted:#6b7a8d;--line:#e2e8f0;--brand:#0b6bcb;--ok:#0f9d58;--warn:#d97706;--bad:#dc2626;--r:14px}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.4}
+#app{max-width:760px;margin:0 auto;padding:0 0 88px}
+.topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--line)}
+.topbar h1{font-size:18px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pad{padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.card.tap{cursor:pointer;transition:.15s}
+.card.tap:active{transform:scale(.995);background:#fafcff}
+.row{display:flex;align-items:center}
+.row.between{justify-content:space-between}
+.row.gap{gap:8px}
+.row.wrap{flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.mt8{margin-top:8px}.mt12{margin-top:12px}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.title{font-weight:600;font-size:16px}
+.pill{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px}
+.pill.ok{background:#e5f6ec;color:#0b7a44}
+.pill.bad{background:#fde8e8;color:#b91c1c}
+.pill.warn{background:#fef3e2;color:#b45309}
+.chip{font-size:12px;background:#eef3fa;color:#2b4a6f;padding:4px 9px;border-radius:999px}
+.btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 14px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.danger{color:var(--bad);border-color:#f3c6c6}
+.btn.small{padding:6px 10px;font-size:12.5px;border-radius:8px}
+.btn.block{width:100%;display:block;text-align:center;margin-bottom:10px}
+.empty{text-align:center;color:var(--muted);padding:48px 20px;background:#fff;border:1px dashed var(--line);border-radius:var(--r)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 8px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+.stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.stat .v{font-size:17px;font-weight:700;margin-top:2px}
+.stat .s{font-size:11px;color:var(--muted);margin-top:2px}
+.tabs{display:flex;gap:4px;padding:8px 16px;overflow-x:auto;position:sticky;top:57px;background:var(--bg);z-index:9}
+.tabs button{border:none;background:transparent;padding:8px 12px;border-radius:999px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;white-space:nowrap}
+.tabs button.on{background:var(--brand);color:#fff}
+.tabbody{padding:8px 16px 16px}
+.listrow{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.listrow .num{width:30px;height:30px;border-radius:8px;background:#eef3fa;color:#2b4a6f;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.listrow .name{font-weight:600}
+.listrow .right{text-align:right;flex:none}
+.listrow .amount{font-weight:700}
+.tag{font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:6px;vertical-align:middle;margin-left:4px}
+.tag.kid{background:#e8f0fe;color:#1a56c4}
+.tag.late{background:#fef3e2;color:#b45309}
+.tag.paid{background:#e5f6ec;color:#0b7a44}
+.tag.part{background:#fef3e2;color:#b45309}
+.tag.unpaid{background:#fde8e8;color:#b91c1c}
+.tag.bad{background:#fde8e8;color:#b91c1c}
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px}
+.filters button{border:1px solid var(--line);background:#fff;padding:6px 11px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;white-space:nowrap}
+.filters button.on{background:#14202e;color:#fff;border-color:#14202e}
+.nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:20}
+.nav button{flex:1;border:none;background:transparent;padding:10px 4px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit}
+.nav button.on{color:var(--brand)}
+.nav button .ic{display:block;font-size:18px;margin-bottom:2px}
+.overlay{position:fixed;inset:0;background:rgba(10,20,35,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:760px;max-height:88vh;overflow:auto;padding:18px 18px calc(18px + env(safe-area-inset-bottom));animation:up .18s ease-out}
+@keyframes up{from{transform:translateY(20px);opacity:.6}to{transform:none;opacity:1}}
+.modal h2{margin:0 0 14px;font-size:18px}
+label{display:block;margin-bottom:12px;font-size:13px;font-weight:600;color:#33445a}
+label input,label select,label textarea{display:block;width:100%;margin-top:5px;padding:10px 11px;border:1px solid var(--line);border-radius:10px;font-size:15px;font-family:inherit;background:#fff;color:var(--ink)}
+label input:focus,label select:focus{outline:2px solid #cfe2fb;border-color:var(--brand)}
+label.check{display:flex;align-items:center;gap:9px;font-weight:500;color:var(--ink)}
+label.check input{width:auto;margin:0}
+.tbl{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;font-size:13px}
+.tbl th,.tbl td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line)}
+.tbl th{background:#f0f4f9;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.tbl tr:last-child td{border-bottom:none}
+.kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.kv:last-child{border-bottom:none}
+.kv b{font-weight:600}
+.note{background:#eef3fa;border-radius:10px;padding:10px 12px;font-size:13px;color:#2b4a6f;margin-bottom:12px}
+.note.warn{background:#fef3e2;color:#92400e}
+.note.bad{background:#fde8e8;color:#991b1b}
+@media(min-width:600px){.stats{grid-template-columns:repeat(6,1fr)}}
+.segmented{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.segmented button{border:none;background:transparent;padding:5px 11px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit}
+.segmented button.on{background:var(--brand);color:#fff}
+.listrow.compact{padding:6px 10px;margin-bottom:5px;gap:8px}
+.listrow.compact .num{width:24px;height:24px;font-size:12px;border-radius:6px}
+.listrow.compact .name{font-size:13.5px}
+.listrow.compact .name .tag{font-size:10px;padding:1px 5px;margin-left:0}
+.listrow.compact .amount{font-size:13.5px}
+.listrow .right[data-act="quick-pay"]{cursor:pointer;transition:background .12s;border-radius:8px;padding:4px 8px}
+.listrow .right[data-act="quick-pay"]:hover{background:#eef3fa}
+.listrow .tag[data-act="quick-pay"]{cursor:pointer}
+.listrow .tag[data-act="quick-pay"]:hover{filter:brightness(.94)}
+select[data-act="sort"]{appearance:none;-webkit-appearance:none;border:1px solid var(--line);border-radius:8px;padding:5px 26px 5px 9px;font-size:12px;font-weight:600;font-family:inherit;background:#fff;color:var(--ink);cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%236b7a8d' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;background-size:11px}
+.swipe-wrap{position:relative;overflow:hidden;border-radius:12px;margin-bottom:8px;background:var(--bad);touch-action:pan-y;-webkit-touch-callout:none}
+.swipe-wrap.compact{margin-bottom:5px}
+.swipe-wrap>.listrow{margin-bottom:0;position:relative;background:#fff;will-change:transform;touch-action:pan-y}
+.swipe-wrap.swiping>.listrow{transition:none}
+.swipe-wrap:not(.swiping)>.listrow{transition:transform .18s ease-out}
+.swipe-wrap>.swipe-action{position:absolute;top:0;bottom:0;right:0;width:96px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12.5px;pointer-events:none}
+.bulk-nav{background:#fff;z-index:25}
+.bulk-nav .bulk-actions{flex:1;display:flex;gap:6px;overflow-x:auto;padding:8px 10px;align-items:center}
+.bulk-nav .bulk-actions .btn{white-space:nowrap;flex:none}
+.bulk-nav .bulk-count{font-size:12px;font-weight:700;color:var(--muted);padding:0 4px 0 10px;flex:none}
+.bulk-nav .btn.done{margin:8px;flex:none}
+.toast{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#14202e;color:#fff;padding:11px 14px;border-radius:10px;display:flex;gap:14px;align-items:center;font-size:13.5px;box-shadow:0 4px 16px rgba(0,0,0,.22);z-index:40;animation:toastin .18s ease-out;max-width:calc(100vw - 32px)}
+.toast button{background:transparent;border:none;color:#7cc4ff;font-weight:700;cursor:pointer;font-family:inherit;font-size:13.5px;padding:0;flex:none}
+@keyframes toastin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal"></div>
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   Constants & formatters
+   ============================================================ */
+const STORE_KEY = 'transportRoster.v1';
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const nowISO = () => new Date().toISOString();
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const val = id => (document.getElementById(id)?.value ?? '');
+const checked = id => !!document.getElementById(id)?.checked;
+const num = v => Number(v) || 0;
+
+function money(n){
+  const c = state.settings.currency || '£';
+  return c + (Math.round((Number(n) || 0) * 100) / 100).toFixed(2);
+}
+function fmtDate(iso){
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+}
+function fmtDateOnly(s){
+  if (!s) return '—';
+  const d = new Date(s + 'T00:00');
+  return isNaN(d) ? s : d.toLocaleDateString(undefined, { dateStyle: 'medium' });
+}
+function toLocalInput(iso){
+  if (!iso) return '';
+  const d = new Date(iso);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function fromLocalInput(v){ return v ? new Date(v).toISOString() : null; }
+function slug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'export'; }
+function fmt1(n){ return (Math.round(n * 10) / 10).toString(); }
+function relativeTime(iso){
+  if (!iso) return 'never';
+  const d = Date.now() - new Date(iso).getTime();
+  if (isNaN(d) || d < 0) return 'just now';
+  if (d < 60_000)       return 'just now';
+  if (d < 3_600_000)    return Math.floor(d/60_000)    + 'm ago';
+  if (d < 86_400_000)   return Math.floor(d/3_600_000) + 'h ago';
+  if (d < 7*86_400_000) return Math.floor(d/86_400_000) + 'd ago';
+  return new Date(iso).toLocaleDateString();
+}
+function fmtHistoryValue(field, v){
+  if (v === null || v === undefined || v === '') return '—';
+  if (field === 'isKid' || field === 'atRisk') return v ? 'Yes' : 'No';
+  if (field === 'deletedAt') return v ? 'deleted' : 'active';
+  return String(v);
+}
+
+/* ============================================================
+   State
+   ============================================================ */
+function defaultState(){
+  return {
+    events: [],
+    templates: [],
+    settings: {
+      currency: '£',
+      supabase: { url: '', anonKey: '' },
+      rosterDensity: 'detailed',
+      rosterSort: 'number',
+      tipsShown: {},
+      installBannerDismissed: false
+    },
+    syncMeta: { status: 'idle', lastAt: null, lastError: null },
+    view: { name: 'events' }
+  };
+}
+function load(){
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return Object.assign(defaultState(), JSON.parse(raw));
+  } catch (e) { console.warn('load failed', e); }
+  return defaultState();
+}
+let state = load();
+function save(){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+  catch (e) { alert('Could not save — device storage may be full.'); }
+}
+function persistAndRender(){
+  save();
+  render();
+  updateSyncIndicator();
+}
+
+/* ============================================================
+   Pricing engine
+   ============================================================ */
+function personDue(p, base, kid){
+  if (p.seatPriceOverride !== null && p.seatPriceOverride !== undefined && p.seatPriceOverride !== '') {
+    return Number(p.seatPriceOverride);
+  }
+  return p.isKid ? kid : base;
+}
+function paidFor(ev, pid){
+  return ev.payments.filter(x => x.passengerId === pid).reduce((s, x) => s + num(x.amount), 0);
+}
+function isLate(ev, p){
+  return !!(ev.deadlineAt && p.addedAt && new Date(p.addedAt) > new Date(ev.deadlineAt));
+}
+function calcPricing(ev){
+  const list = (ev.passengers || []).filter(p => !p.deletedAt);
+  const A = list.filter(p => !p.isKid).length;
+  const K = list.filter(p => p.isKid).length;
+  const U = A + 0.5 * K;
+
+  let B = 0;
+  if (ev.noShowMode === 'units') B = num(ev.noShowUnits);
+  else if (ev.noShowMode === 'percent') B = U * (num(ev.noShowPercent) / 100);
+  else if (ev.noShowMode === 'atRisk') {
+    B = list.filter(p => p.atRisk).reduce((s, p) => s + (p.isKid ? 0.5 : 1), 0);
+  }
+  B = Math.max(0, Math.min(B, Math.max(0, U - 1)));
+  const D = Math.max(0, U - B);
+
+  const totalCost = num(ev.totalTransportCost);
+  let rawBase = ev.pricingMode === 'manual'
+    ? num(ev.manualSeatPrice)
+    : (D > 0 ? totalCost / D : 0);
+
+  const roundFn = ev.roundingMode === 'ceil' ? Math.ceil : (x => Math.round(x * 100) / 100);
+  const base = roundFn(rawBase);
+  const kid  = roundFn(base / 2);
+
+  let expected = 0;
+  for (const p of list) expected += personDue(p, base, kid);
+
+  const surplus = expected - totalCost;
+  const tolerance = base > 0 ? Math.max(0, Math.floor(surplus / base + 1e-9)) : 0;
+
+  return { A, K, U, B, D, rawBase, base, kid, expected, totalCost, surplus, tolerance, count: list.length };
+}
+function paxVersion(p){
+  return [p.deletedAt, p.updatedAt, p.addedAt]
+    .filter(Boolean).sort().pop() || '1970-01-01T00:00:00.000Z';
+}
+function payVersion(x){
+  return [x.editedAt, x.updatedAt, x.recordedAt]
+    .filter(Boolean).sort().pop() || '1970-01-01T00:00:00.000Z';
+}
+function filterPassengers(ev, f, pr){
+  return ev.passengers.filter(p => {
+    if (f === 'removed') return !!p.deletedAt;
+    if (p.deletedAt) return false;
+    const due = personDue(p, pr.base, pr.kid);
+    const paid = paidFor(ev, p.id);
+    switch (f) {
+      case 'ontime':  return !isLate(ev, p);
+      case 'late':    return isLate(ev, p);
+      case 'adults':  return !p.isKid;
+      case 'kids':    return p.isKid;
+      case 'atRisk':  return !!p.atRisk;
+      case 'unpaid':  return paid <= 0.005;
+      case 'partial': return paid > 0.005 && paid < due - 0.005;
+      case 'paid':    return paid >= due - 0.005;
+      default:        return true;
+    }
+  });
+}
+
+/* ============================================================
+   Shared mutation helpers (soft delete / restore / bulk)
+   ============================================================ */
+function softDeletePassenger(ev, p){
+  if (!ev || !p || p.deletedAt) return false;
+  const ts = nowISO();
+  p.deletedAt = ts;
+  p.updatedAt = ts;
+  if (!Array.isArray(p.editHistory)) p.editHistory = [];
+  p.editHistory.push({ field: 'deletedAt', oldValue: null, newValue: ts, at: ts });
+  ev.updatedAt = ts;
+  markDirty(ev);
+  return true;
+}
+function restorePassenger(ev, p){
+  if (!ev || !p || !p.deletedAt) return false;
+  const ts = nowISO();
+  const prevDeletedAt = p.deletedAt;
+  p.deletedAt = null;
+  p.updatedAt = ts;
+  if (!Array.isArray(p.editHistory)) p.editHistory = [];
+  p.editHistory.push({ field: 'deletedAt', oldValue: prevDeletedAt, newValue: null, at: ts });
+  ev.updatedAt = ts;
+  markDirty(ev);
+  return true;
+}
+function restorePassengers(ev, ps){
+  let n = 0;
+  for (const p of ps) { if (restorePassenger(ev, p)) n++; }
+  return n;
+}
+function bulkMarkPaid(ev, ids){
+  const pr = calcPricing(ev);
+  const ts = nowISO();
+  const names = [];
+  for (const pid of ids) {
+    const p = ev.passengers.find(x => x.id === pid);
+    if (!p || p.deletedAt) continue;
+    const due = personDue(p, pr.base, pr.kid);
+    const paid = paidFor(ev, p.id);
+    const owed = due - paid;
+    if (owed <= 0.005) continue;
+    ev.payments.push({
+      id: uid(), passengerId: p.id, amount: owed, method: 'cash',
+      note: 'Bulk mark paid', recordedAt: ts, editedAt: null, editHistory: []
+    });
+    names.push(p.name);
+  }
+  if (names.length) {
+    ev.updatedAt = ts;
+    markDirty(ev);
+    logActivity(ev, 'payment.bulk.added', { count: names.length, names });
+  }
+  return names.length;
+}
+function bulkToggle(ev, ids, field){
+  const ts = nowISO();
+  const names = [];
+  for (const pid of ids) {
+    const p = ev.passengers.find(x => x.id === pid);
+    if (!p || p.deletedAt) continue;
+    const before = !!p[field];
+    p[field] = !before;
+    p.updatedAt = ts;
+    if (!Array.isArray(p.editHistory)) p.editHistory = [];
+    p.editHistory.push({ field, oldValue: before, newValue: p[field], at: ts });
+    names.push(p.name);
+  }
+  if (names.length) {
+    ev.updatedAt = ts;
+    markDirty(ev);
+    logActivity(ev, 'passenger.bulk.' + field, { count: names.length, names });
+  }
+  return names.length;
+}
+
+/* ============================================================
+   Toast
+   ============================================================ */
+let toastTimer = null;
+function showToast(html){
+  clearToast();
+  document.getElementById('toast').innerHTML = `<div class="toast">${html}</div>`;
+  toastTimer = setTimeout(clearToast, 5000);
+}
+function clearToast(){
+  if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+  const t = document.getElementById('toast');
+  if (t) t.innerHTML = '';
+}
+function showUndoToast(ev, p){
+  showToast(`<span>Removed ${esc(p.name)}</span>
+    <button data-act="undo-delete" data-eid="${ev.id}" data-id="${p.id}">Undo</button>`);
+}
+function showMultiUndoToast(ev, passengers){
+  if (!passengers.length) return;
+  if (passengers.length === 1) return showUndoToast(ev, passengers[0]);
+  showToast(`<span>Removed ${passengers.length} people</span>
+    <button data-act="undo-delete-many" data-eid="${ev.id}" data-ids="${passengers.map(p=>p.id).join(',')}">Undo</button>`);
+}
+
+/* ============================================================
+   Bulk selection state
+   ============================================================ */
+let bulkMode = false;
+let bulkSelection = new Set();
+function exitBulk(){ bulkMode = false; bulkSelection.clear(); }
+
+/* ============================================================
+   Sync (auto-queue + read-only guard)
+   ============================================================ */
+let syncFlushTimer = null;
+let syncInFlight = false;
+
+function markDirty(ev){
+  if (!ev) return;
+  ev.syncState = 'dirty';
+  if (window.Cloud?.isConfigured() && window.Cloud?.getUser()) scheduleSyncFlush(1200);
+}
+function scheduleSyncFlush(delay = 1200){
+  if (!window.Cloud?.isConfigured() || !window.Cloud?.getUser()) return;
+  if (syncFlushTimer) clearTimeout(syncFlushTimer);
+  syncFlushTimer = setTimeout(flushQueue, delay);
+}
+async function flushQueue(){
+  syncFlushTimer = null;
+  if (!window.Cloud?.isConfigured() || !window.Cloud?.getUser()) return;
+  if (!navigator.onLine) { updateSyncIndicator(); return; }
+  if (syncInFlight) return;
+
+  const dirty   = state.events.filter(e => e.syncState === 'dirty' && e.myRole !== 'viewer');
+  const viewers = state.events.filter(e => e.myRole === 'viewer');
+  if (!dirty.length && !viewers.length) { updateSyncIndicator(); return; }
+
+  syncInFlight = true;
+  state.syncMeta.status = 'syncing';
+  updateSyncIndicator();
+
+  for (const ev of dirty) {
+    try {
+      await window.Cloud.syncEvent(ev);
+      ev.syncState = 'synced';
+    } catch (e) {
+      if (e.name === 'ConflictError') {
+        persistAndRender();
+        if (state.view.name === 'event' && state.view.id === ev.id) conflictModal(ev);
+        else showToast(`Conflict on "${esc(ev.name)}" — open it to resolve`);
+      } else {
+        state.syncMeta.status = 'error';
+        state.syncMeta.lastError = e.message;
+        syncInFlight = false;
+        save(); updateSyncIndicator();
+        return;
+      }
+    }
+  }
+
+  const now = Date.now();
+  for (const ev of viewers) {
+    const lastPull = ev.lastSyncedAt ? new Date(ev.lastSyncedAt).getTime() : 0;
+    if (now - lastPull < 25000) continue;
+    try { await window.Cloud.pullEvent(ev); } catch (_) { /* ignore */ }
+  }
+
+  state.syncMeta.status = 'idle';
+  state.syncMeta.lastAt = nowISO();
+  state.syncMeta.lastError = null;
+  syncInFlight = false;
+  persistAndRender();
+  updateSyncIndicator();
+}
+function syncIndicatorInline(){
+  if (!window.Cloud?.getUser()) return '';
+  return `<span id="sync-indicator"></span>`;
+}
+function updateSyncIndicator(){
+  const el = document.getElementById('sync-indicator');
+  if (!el) return;
+  if (!window.Cloud?.getUser()) { el.innerHTML = ''; return; }
+  const pending = state.events.filter(e => e.syncState === 'dirty' && e.myRole !== 'viewer').length;
+  let cls = 'pill ok', text = '✓';
+  if (!navigator.onLine)                 { cls = 'pill bad';  text = pending ? `⚠ ${pending}` : '⚠'; }
+  else if (syncInFlight)                 { cls = 'pill warn'; text = '⟳'; }
+  else if (state.syncMeta?.status === 'error') { cls = 'pill bad';  text = '✗'; }
+  else if (pending)                      { cls = 'pill warn'; text = String(pending); }
+  el.innerHTML = `<span class="${cls}" style="cursor:pointer;font-size:11px" data-act="sync-now" title="Sync now">☁ ${text}</span>`;
+}
+
+function canEdit(ev){
+  if (!ev) return true;
+  return ev.myRole !== 'viewer';
+}
+const MUTATING = new Set([
+  'edit-event','delete-event','new-passenger','edit-passenger','delete-passenger',
+  'restore-passenger','record-payment','record-payment-for','edit-payment',
+  'toggle-atRisk','undo-delete','undo-delete-many','share-event','sync-now',
+  'bulk-mark-paid','bulk-toggle-kid','bulk-toggle-atRisk','bulk-remove',
+  'import-csv','commit-import',
+]);
+function guardReadOnly(act, el){
+  if (!MUTATING.has(act)) return true;
+  let candidate = el.dataset.eid || el.dataset.id;
+  if (!candidate && state.view.name === 'event') candidate = state.view.id;
+  if (!candidate) return true;
+  const ev = state.events.find(x => x.id === candidate);
+  if (ev && !canEdit(ev)) { showToast('Read-only view'); return false; }
+  return true;
+}
+
+/* ============================================================
+   Activity log
+   ============================================================ */
+function logActivity(ev, action, details){
+  if (!ev) return;
+  const user = window.Cloud?.getUser?.();
+  const entry = {
+    id: uid(),
+    at: nowISO(),
+    action,
+    actor: user ? { id: user.id, email: user.email || 'signed-in user' }
+                : { id: 'local', email: 'this device' },
+    details: details || {}
+  };
+  if (!Array.isArray(ev.activity)) ev.activity = [];
+  ev.activity.push(entry);
+  if (ev.remoteId && window.Cloud?.getUser?.()) {
+    window.Cloud.pushLog(ev, entry).catch(err => console.warn('log push failed', err));
+  }
+}
+function activityText(e){
+  const d = e.details || {};
+  switch (e.action) {
+    case 'event.created':           return `Created event “${d.name || ''}”`;
+    case 'event.updated':           return `Updated event settings`;
+    case 'passenger.added':         return `Added ${d.name}${d.isKid ? ' (kid)' : ''}${d.fromTemplate ? ' from template' : ''}`;
+    case 'passenger.updated':       return `Edited ${d.name}`;
+    case 'passenger.removed':       return `Removed ${d.name}`;
+    case 'passenger.restored':      return `Restored ${d.name}`;
+    case 'passenger.atRisk.on':     return `Marked ${d.name} at-risk`;
+    case 'passenger.atRisk.off':    return `Cleared at-risk flag for ${d.name}`;
+    case 'payment.added':           return `Recorded ${money(d.amount)} from ${d.name} (${d.method || ''})`;
+    case 'payment.edited':          return `Edited payment from ${d.name} → ${money(d.amount)}`;
+    case 'payment.bulk.added':      return `Bulk-marked ${d.count} as paid${d.names?.length ? `: ${d.names.join(', ')}` : ''}`;
+    case 'passenger.bulk.removed':  return `Bulk-removed ${d.count}${d.names?.length ? `: ${d.names.join(', ')}` : ''}`;
+    case 'passenger.bulk.isKid':    return `Bulk-toggled kid for ${d.count}${d.names?.length ? `: ${d.names.join(', ')}` : ''}`;
+    case 'passenger.bulk.atRisk':   return `Bulk-toggled at-risk for ${d.count}${d.names?.length ? `: ${d.names.join(', ')}` : ''}`;
+    case 'passenger.bulk.imported': return `Imported ${d.count} passenger${d.count === 1 ? '' : 's'} from CSV${d.names?.length ? `: ${d.names.join(', ')}` : ''}`;
+    case 'share.created':           return `Created share link${d.role ? ` (${d.role})` : ''}`;
+    case 'share.revoked':           return `Revoked share link`;
+    default:                        return e.action;
+  }
+}
+function activityTab(ev){
+  const entries = [...(ev.activity || [])].sort((a,b) => String(b.at).localeCompare(String(a.at)));
+  if (!entries.length) return `<div class="empty">No activity recorded yet.</div>`;
+  const pById = new Map((ev.passengers || []).map(p => [p.id, p]));
+  return entries.map(e => {
+    const actor = e.actor?.email && e.actor.email !== 'local'
+      ? esc(e.actor.email) : 'this device';
+    let action = '';
+    if (e.action === 'passenger.removed' && e.details?.pid) {
+      const p = pById.get(e.details.pid);
+      if (p && p.deletedAt) {
+        action = canEdit(ev)
+          ? `<button class="btn small" data-act="restore-passenger" data-eid="${ev.id}" data-id="${p.id}">Restore</button>`
+          : '';
+      } else if (p && !p.deletedAt) {
+        action = `<span class="tag paid">Restored</span>`;
+      }
+    }
+    return `
+      <div class="listrow">
+        <div class="grow">
+          <div>${esc(activityText(e))}</div>
+          <div class="muted small">${fmtDate(e.at)} · ${actor}</div>
+        </div>
+        ${action}
+      </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   Modal system
+   ============================================================ */
+let modalSubmit = null;
+function showModal(html, onSubmit){
+  modalSubmit = onSubmit || null;
+  document.getElementById('modal').innerHTML =
+    `<div class="overlay" data-act="close-modal"><div class="modal">${html}</div></div>`;
+  const form = document.querySelector('#modal form');
+  if (form && modalSubmit) form.addEventListener('submit', e => { e.preventDefault(); modalSubmit(); });
+}
+function closeModal(){ modalSubmit = null; document.getElementById('modal').innerHTML = ''; }
+
+function conflictModal(ev){
+  showModal(`
+    <h2>Sync conflict</h2>
+    <div class="note warn">
+      Someone else saved changes to this event since your last sync. Choose how to resolve:
+    </div>
+    <button class="btn block" data-act="conflict-pull" data-id="${ev.id}">
+      <b>Pull remote</b> — discard my local changes
+    </button>
+    <button class="btn block" data-act="conflict-merge" data-id="${ev.id}">
+      <b>Merge</b> — combine both (union passengers + payments, latest settings)
+    </button>
+    <button class="btn block danger" data-act="conflict-force" data-id="${ev.id}">
+      <b>Force push</b> — overwrite remote with my version
+    </button>
+    <button class="btn block" data-act="close-modal">Cancel</button>
+  `);
+}
+
+/* ============================================================
+   Render root
+   ============================================================ */
+function render(){
+  const v = state.view;
+  let html = '';
+  if      (v.name === 'events')    html = viewEvents();
+  else if (v.name === 'event')     html = viewEvent(v.id, v.tab || 'roster');
+  else if (v.name === 'templates') html = viewTemplates();
+  else if (v.name === 'template')  html = viewTemplate(v.id);
+  else if (v.name === 'settings')  html = viewSettings();
+  else html = viewEvents();
+  document.getElementById('app').innerHTML = html + bottomNav();
+}
+
+function bottomNav(){
+  if (bulkMode && state.view.name === 'event') {
+    return `
+      <div class="nav bulk-nav">
+        <span class="bulk-count">${bulkSelection.size} sel</span>
+        <div class="bulk-actions">
+          <button class="btn small" data-act="bulk-mark-paid">Mark paid</button>
+          <button class="btn small" data-act="bulk-toggle-kid">Toggle kid</button>
+          <button class="btn small" data-act="bulk-toggle-atRisk">Toggle risk</button>
+          <button class="btn small" data-act="bulk-export">Export</button>
+          <button class="btn small danger" data-act="bulk-remove">Remove</button>
+        </div>
+        <button class="btn small done" data-act="toggle-select">Done</button>
+      </div>`;
+  }
+  const n = state.view.name;
+  const on = k => (n === k ? ' class="on"' : '');
+  return `
+    <div class="nav">
+      <button data-act="nav" data-to="events"${on('events')}><span class="ic">◈</span>Events</button>
+      <button data-act="nav" data-to="templates"${on('templates')}><span class="ic">▤</span>Templates</button>
+      <button data-act="nav" data-to="settings"${on('settings')}><span class="ic">⚙</span>Settings</button>
+    </div>`;
+}
+
+/* ============================================================
+   Views
+   ============================================================ */
+function viewEvents(){
+  const evs = [...state.events].sort((a, b) => String(b.eventDate||'').localeCompare(String(a.eventDate||'')));
+  const cards = evs.map(ev => {
+    const pr = calcPricing(ev);
+    const collected = ev.payments.reduce((s, p) => s + num(p.amount), 0);
+    const closed = ev.deadlineAt && new Date(ev.deadlineAt) < new Date();
+    const roleTag = ev.myRole === 'viewer' ? ' <span class="tag" style="background:#e5f6ec;color:#0b7a44">👁</span>' : '';
+    return `
+      <div class="card tap" data-act="open-event" data-id="${ev.id}">
+        <div class="row between">
+          <div class="grow">
+            <div class="title">${esc(ev.name)}${roleTag}</div>
+            <div class="muted small">${fmtDateOnly(ev.eventDate)}</div>
+          </div>
+          <span class="pill ${closed ? 'bad' : 'ok'}">${closed ? 'Closed' : 'Open'}</span>
+        </div>
+        <div class="row gap wrap mt8">
+          <span class="chip">${pr.count} people</span>
+          <span class="chip">${money(pr.base)}/seat</span>
+          <span class="chip">${money(collected)} of ${money(pr.expected)}</span>
+        </div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="topbar">
+      <h1>Events</h1>
+      ${syncIndicatorInline()}
+      <button class="btn primary" data-act="new-event">+ New</button>
+    </div>
+    <div class="pad">
+      ${canShowInstallButton() && !installBannerDismissed ? `
+        <div class="card" style="background:#eef3fa;border-color:#cfe2fb;display:flex;gap:10px;align-items:center">
+          <div class="grow" style="min-width:0">
+            <div class="title" style="font-size:14px">Install Transport Roster</div>
+            <div class="muted small">Quick access from your home screen · works offline</div>
+          </div>
+          <button class="btn primary small" data-act="install-app">Install</button>
+          <button class="btn small" data-act="dismiss-install" title="Dismiss" style="padding:4px 8px">✕</button>
+        </div>
+      ` : ''}
+      ${evs.length ? cards : `<div class="empty">No events yet.<br>Tap <b>+ New</b> to get started.</div>`}
+    </div>`;
+}
+
+function viewEvent(id, tab){
+  const ev = state.events.find(e => e.id === id);
+  if (!ev) return `<div class="pad"><div class="empty">Event not found.</div></div>`;
+  const pr = calcPricing(ev);
+  const collected = ev.payments.reduce((s, p) => s + num(p.amount), 0);
+  const outstanding = Math.max(0, pr.expected - collected);
+
+  const stats = `
+    <div class="stats">
+      <div class="stat"><div class="k">People</div><div class="v">${pr.count}</div><div class="s">${pr.A}A · ${pr.K}K</div></div>
+      <div class="stat"><div class="k">Seat units</div><div class="v">${fmt1(pr.U)}</div><div class="s">divisor ${fmt1(pr.D)}</div></div>
+      <div class="stat"><div class="k">Seat price</div><div class="v">${money(pr.base)}</div><div class="s">kid ${money(pr.kid)}</div></div>
+      <div class="stat"><div class="k">Expected</div><div class="v">${money(pr.expected)}</div><div class="s">cost ${money(pr.totalCost)}</div></div>
+      <div class="stat"><div class="k">Collected</div><div class="v">${money(collected)}</div><div class="s">due ${money(outstanding)}</div></div>
+      <div class="stat"><div class="k">Buffer</div><div class="v">${money(pr.surplus)}</div><div class="s">${pr.tolerance} no-show${pr.tolerance===1?'':'s'}</div></div>
+    </div>`;
+
+  const tabs = ['roster','contacts','payments','activity','settings','export'];
+  const tabBar = `<div class="tabs">${tabs.map(t =>
+    `<button data-act="tab" data-tab="${t}" class="${t===tab?'on':''}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>`;
+
+  let body = '';
+  if (tab === 'roster')        body = rosterTab(ev, pr);
+  else if (tab === 'contacts') body = contactsTab(ev);
+  else if (tab === 'payments') body = paymentsTab(ev, pr);
+  else if (tab === 'activity') body = activityTab(ev);
+  else if (tab === 'settings') body = settingsTab(ev, pr);
+  else if (tab === 'export')   body = exportTab(ev);
+
+  return `
+    <div class="topbar">
+      <button class="btn small" data-act="nav" data-to="events">←</button>
+      <h1>${esc(ev.name)}${ev.myRole==='viewer' ? ' <span class="tag" style="background:#e5f6ec;color:#0b7a44">👁 View</span>' : ''}${ev.syncState==='dirty' && canEdit(ev) ? ' <span class="pill warn" style="font-size:10px;vertical-align:middle">•</span>' : ''}</h1>
+      ${syncIndicatorInline()}
+      ${canEdit(ev) ? `<button class="btn small" data-act="share-event" data-id="${ev.id}" title="Share">⇪</button>` : ''}
+      ${canEdit(ev) ? `<button class="btn small" data-act="edit-event" data-id="${ev.id}">✎</button>` : ''}
+    </div>
+    ${stats}
+    ${tabBar}
+    <div class="tabbody">${body}</div>`;
+}
+
+/* ---------- roster tab ---------- */
+function rosterTab(ev, pr){
+  const f = state.view.filter || 'all';
+  const sortMode = state.settings.rosterSort || 'number';
+  const compact = (state.settings.rosterDensity || 'detailed') === 'compact';
+
+  const removedCount = ev.passengers.filter(p => p.deletedAt).length;
+  const filters = [
+    ['all','All'],['ontime','On time'],['late','Late'],['adults','Adults'],['kids','Kids'],
+    ['atRisk','At-risk'],
+    ['unpaid','Unpaid'],['partial','Partial'],['paid','Paid'],
+    ...(removedCount ? [['removed', `Removed (${removedCount})`]] : [])
+  ];
+
+  const cmp = (a, b) => {
+    switch (sortMode) {
+      case 'name':         return String(a.name).localeCompare(String(b.name));
+      case 'added-desc':   return String(b.addedAt || '').localeCompare(String(a.addedAt || ''));
+      case 'added-asc':    return String(a.addedAt || '').localeCompare(String(b.addedAt || ''));
+      case 'balance-desc': return (personDue(b, pr.base, pr.kid) - paidFor(ev, b.id))
+                                - (personDue(a, pr.base, pr.kid) - paidFor(ev, a.id));
+      case 'balance-asc':  return (personDue(a, pr.base, pr.kid) - paidFor(ev, a.id))
+                                - (personDue(b, pr.base, pr.kid) - paidFor(ev, b.id));
+      default:             return a.listNumber - b.listNumber;
+    }
+  };
+
+  const list = filterPassengers(ev, f, pr).sort(cmp);
+
+  const rows = list.map(p => {
+    const due = personDue(p, pr.base, pr.kid);
+    const paid = paidFor(ev, p.id);
+    const bal = due - paid;
+    let st = 'unpaid', stTxt = 'Unpaid';
+    if (paid >= due - 0.005) { st = 'paid'; stTxt = 'Paid'; }
+    else if (paid > 0.005)   { st = 'part'; stTxt = `Due ${money(bal)}`; }
+
+    const removed = !!p.deletedAt;
+    const sel = bulkSelection.has(p.id);
+    const strike = removed ? 'text-decoration:line-through;opacity:.55' : '';
+    const dim = removed ? 'opacity:.55' : '';
+    const quick = (removed || bulkMode || !canEdit(ev)) ? '' : ` data-act="quick-pay" data-eid="${ev.id}" data-id="${p.id}"`;
+    const rowAct = bulkMode ? 'toggle-select-one' : 'open-passenger';
+    const titleAttr = removed ? 'Tap to restore'
+      : bulkMode ? 'Tap to toggle selection'
+      : canEdit(ev) ? 'Tap to open · Tap price to pay · Long-press to toggle at-risk · Swipe left to remove'
+      : 'Tap to open (read-only)';
+
+    const numCell = bulkMode
+      ? `<div class="num" style="background:${sel?'var(--brand)':'#fff'};border:1.5px solid ${sel?'var(--brand)':'var(--line)'};color:${sel?'#fff':'transparent'}">✓</div>`
+      : `<div class="num">${p.listNumber}</div>`;
+
+    const badges = `
+      ${p.isKid ? '<span class="tag kid">Kid</span>' : ''}
+      ${p.atRisk ? '<span class="tag" style="background:#fef3e2;color:#92400e">Risk</span>' : ''}
+      ${isLate(ev, p) ? '<span class="tag late">Late</span>' : ''}
+      ${removed ? '<span class="tag bad">Removed</span>'
+                : (bulkMode ? `<span class="tag ${st}">${stTxt}</span>` : `<span class="tag ${st}"${quick}>${stTxt}</span>`)}
+    `;
+
+    const rowBody = compact
+      ? `<div class="listrow tap compact" data-act="${rowAct}" data-eid="${ev.id}" data-id="${p.id}" title="${titleAttr}" style="${dim}">
+           ${numCell}
+           <div class="grow" style="min-width:0">
+             <div class="name" style="display:flex;align-items:center;gap:4px;min-width:0;${strike}">
+               <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</span>
+               <span style="display:flex;gap:2px;flex:none">${badges}</span>
+             </div>
+           </div>
+           <div class="right" style="flex:none"${quick}><div class="amount">${money(due)}</div></div>
+         </div>`
+      : `<div class="listrow tap" data-act="${rowAct}" data-eid="${ev.id}" data-id="${p.id}" title="${titleAttr}" style="${dim}">
+           ${numCell}
+           <div class="grow">
+             <div class="name" style="${strike}">${esc(p.name)}${badges}</div>
+             <div class="muted small">
+               ${removed
+                 ? `Removed ${fmtDate(p.deletedAt)}`
+                 : `Added ${fmtDate(p.addedAt)}${p.phone ? ' · ' + esc(p.phone) : ''}`}
+             </div>
+           </div>
+           <div class="right"${quick}>
+             <div class="amount">${money(due)}</div>
+             <div class="muted small">${paid > 0 ? money(paid) + ' paid' : ''}</div>
+           </div>
+         </div>`;
+
+    return `<div class="swipe-wrap${compact ? ' compact' : ''}">
+      <div class="swipe-action">Delete</div>
+      ${rowBody}
+    </div>`;
+  }).join('');
+
+  const showTip = !state.settings.tipsShown?.longPress && list.length > 0 && !bulkMode && canEdit(ev);
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
+      <select data-act="sort" aria-label="Sort roster">
+        <option value="number" ${sortMode==='number'?'selected':''}># Number</option>
+        <option value="name" ${sortMode==='name'?'selected':''}>A → Z name</option>
+        <option value="added-desc" ${sortMode==='added-desc'?'selected':''}>Newest added</option>
+        <option value="added-asc" ${sortMode==='added-asc'?'selected':''}>Oldest added</option>
+        <option value="balance-desc" ${sortMode==='balance-desc'?'selected':''}>Highest balance</option>
+        <option value="balance-asc" ${sortMode==='balance-asc'?'selected':''}>Lowest balance</option>
+      </select>
+      <div style="display:flex;gap:6px;align-items:center">
+        ${canEdit(ev) ? `<button class="btn small" data-act="toggle-select" title="Select multiple">
+          ${bulkMode ? '✕ Cancel' : '☑ Select'}
+        </button>` : ''}
+        <div class="segmented" role="group" aria-label="Roster density">
+          <button data-act="density" data-mode="compact" class="${compact ? 'on' : ''}" aria-pressed="${compact}">Compact</button>
+          <button data-act="density" data-mode="detailed" class="${!compact ? 'on' : ''}" aria-pressed="${!compact}">Detailed</button>
+        </div>
+      </div>
+    </div>
+    ${showTip ? `<div class="note" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-size:12.5px">
+      <div><b>Tip:</b> tap the price to record a payment · <b>long-press a row</b> to toggle at-risk · <b>swipe left</b> to remove.</div>
+      <button class="btn small" data-act="dismiss-tip" data-tip="longPress" style="padding:2px 7px;font-size:11px;flex:none">✕</button>
+    </div>` : ''}
+    <div class="filters">${filters.map(([k, l]) =>
+      `<button data-act="filter" data-filter="${k}" class="${f===k?'on':''}">${l}</button>`).join('')}</div>
+    ${bulkMode
+      ? `<button class="btn block" data-act="bulk-select-all">
+           ${bulkSelection.size === list.filter(p => !p.deletedAt).length && bulkSelection.size > 0 ? '✕ Deselect all' : '☑ Select all'} (${list.filter(p => !p.deletedAt).length})
+         </button>`
+      : canEdit(ev)
+        ? `<div style="display:flex;gap:8px;margin-bottom:10px">
+             <button class="btn primary" style="flex:1" data-act="new-passenger" data-id="${ev.id}">+ Add person</button>
+             <button class="btn" data-act="import-csv" data-id="${ev.id}" title="Import from CSV">⇪ CSV</button>
+           </div>`
+        : `<div class="note" style="display:flex;align-items:center;gap:8px;font-size:12.5px">
+             <span>👁</span><span>Read-only view — shared by an organiser.</span>
+           </div>`}
+    ${list.length ? rows : `<div class="empty">No people match this filter.</div>`}
+    ${pr.U > 0 ? coverageCard(ev, pr) : ''}`;
+}
+
+function coverageCard(ev, pr){
+  const rows = [];
+  for (let k = 0; k <= pr.tolerance + 2; k++) {
+    const collected = pr.expected - k * pr.base;
+    const ok = collected >= pr.totalCost - 0.005;
+    rows.push(`<div class="kv"><span>${k} adult no-show${k===1?'':'s'}</span>
+      <b style="color:${ok?'var(--ok)':'var(--bad)'}">${money(collected - pr.totalCost)}</b></div>`);
+  }
+  return `
+    <div class="section mt12">
+      <h3>Worst-case coverage (adult no-shows)</h3>
+      <div class="card">
+        <div class="kv"><span>Expected if all show</span><b>${money(pr.expected)}</b></div>
+        <div class="kv"><span>Transport cost</span><b>${money(pr.totalCost)}</b></div>
+        <div class="kv"><span>Buffer held</span><b>${money(pr.surplus)}</b></div>
+        ${rows.join('')}
+        <div class="note mt12">Covered up to <b>${pr.tolerance}</b> adult no-show${pr.tolerance===1?'':'s'}.</div>
+      </div>
+    </div>`;
+}
+
+function contactsTab(ev){
+  const list = ev.passengers.filter(p => !p.deletedAt).sort((a,b)=>a.listNumber-b.listNumber);
+  if (!list.length) return `<div class="empty">No contacts yet.</div>`;
+  return `
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th></tr></thead>
+      <tbody>${list.map(p => `
+        <tr>
+          <td>${p.listNumber}</td>
+          <td>${esc(p.name)}${p.isKid?' <span class="tag kid">Kid</span>':''}</td>
+          <td>${p.phone ? `<a href="tel:${esc(p.phone)}">${esc(p.phone)}</a>` : '—'}</td>
+          <td>${p.email ? `<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>` : '—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function paymentsTab(ev, pr){
+  const list = [...ev.payments].sort((a,b)=>String(b.recordedAt).localeCompare(String(a.recordedAt)));
+  const nameOf = id => ev.passengers.find(p => p.id === id)?.name || 'Unknown';
+  const rows = list.map(p => `
+    <tr>
+      <td>${fmtDate(p.recordedAt)}${p.editedAt?`<div class="muted small">edited ${fmtDate(p.editedAt)}</div>`:''}</td>
+      <td>${esc(nameOf(p.passengerId))}</td>
+      <td>${money(p.amount)}</td>
+      <td>${esc(p.method)}</td>
+      ${canEdit(ev) ? `<td><button class="btn small" data-act="edit-payment" data-eid="${ev.id}" data-id="${p.id}">Edit</button></td>` : ''}
+    </tr>`).join('');
+  return `
+    ${canEdit(ev) ? `<button class="btn primary block" data-act="record-payment" data-id="${ev.id}">+ Record payment</button>` : ''}
+    ${list.length ? `<table class="tbl">
+      <thead><tr><th>Recorded</th><th>Person</th><th>Amount</th><th>Method</th>${canEdit(ev) ? '<th></th>' : ''}</tr></thead>
+      <tbody>${rows}</tbody></table>`
+      : `<div class="empty">No payments recorded yet.</div>`}`;
+}
+
+function settingsTab(ev, pr){
+  return `
+    <div class="card">
+      <div class="kv"><span>Event date</span><b>${fmtDateOnly(ev.eventDate)}</b></div>
+      <div class="kv"><span>Entry deadline</span><b>${fmtDate(ev.deadlineAt)}</b></div>
+      <div class="kv"><span>Pricing mode</span><b>${ev.pricingMode === 'manual' ? 'Manual' : 'Automatic'}</b></div>
+      <div class="kv"><span>Raw base price</span><b>${money(pr.rawBase)}</b></div>
+      <div class="kv"><span>Rounded base</span><b>${money(pr.base)}</b></div>
+      <div class="kv"><span>Kid price</span><b>${money(pr.kid)}</b></div>
+      <div class="kv"><span>Rounding</span><b>${ev.roundingMode === 'ceil' ? 'Up to whole' : 'None'}</b></div>
+      <div class="kv"><span>Fail-safe buffer</span><b>${ev.noShowMode === 'none' ? 'Off' : (ev.noShowMode === 'units' ? pr.B + ' units' : ev.noShowMode === 'percent' ? num(ev.noShowPercent) + '%' : 'from at-risk')}</b></div>
+      <div class="kv"><span>Total transport cost</span><b>${money(pr.totalCost)}</b></div>
+    </div>
+    ${canEdit(ev) ? `
+      <button class="btn block" data-act="edit-event" data-id="${ev.id}">Edit event settings</button>
+      <button class="btn block danger" data-act="delete-event" data-id="${ev.id}">Delete event</button>
+    ` : `<div class="note" style="display:flex;align-items:center;gap:8px"><span>👁</span><span class="muted small">Read-only view — only an editor can change settings.</span></div>`}`;
+}
+
+function exportTab(ev){
+  return `
+    <button class="btn block primary" data-act="copy-roster" data-id="${ev.id}">📋 Copy roster to clipboard</button>
+    <button class="btn block" data-act="export-roster" data-id="${ev.id}">Roster + summary (CSV)</button>
+    <button class="btn block" data-act="export-payments" data-id="${ev.id}">Payments ledger (CSV)</button>
+    <button class="btn block" data-act="export-json" data-id="${ev.id}">Full event backup (JSON)</button>
+    <button class="btn block" data-act="print-event" data-id="${ev.id}">Print / Save as PDF</button>
+    <div class="note mt12">Exports include the pricing assumptions (buffer, rounding, divisor) so recipients understand the seat price.</div>`;
+}
+
+function viewTemplates(){
+  const cards = state.templates.map(t => `
+    <div class="card tap" data-act="open-template" data-id="${t.id}">
+      <div class="row between">
+        <div class="grow">
+          <div class="title">${esc(t.name)}</div>
+          <div class="muted small">${t.items.length} item${t.items.length===1?'':'s'}${t.description ? ' · ' + esc(t.description) : ''}</div>
+        </div>
+        <span class="chip">Open</span>
+      </div>
+    </div>`).join('');
+  return `
+    <div class="topbar">
+      <h1>Templates</h1>
+      <button class="btn primary" data-act="new-template">+ New</button>
+    </div>
+    <div class="pad">
+      ${state.templates.length ? cards : `<div class="empty">No templates yet.<br>Build one to reuse people lists.</div>`}
+    </div>`;
+}
+
+function viewTemplate(id){
+  const t = state.templates.find(x => x.id === id);
+  if (!t) return `<div class="pad"><div class="empty">Template not found.</div></div>`;
+  const rows = t.items.map((it, i) => `
+    <div class="listrow">
+      <div class="num">${i + 1}</div>
+      <div class="grow">
+        <div class="name">${esc(it.name)}${it.defaultIsKid?' <span class="tag kid">Kid</span>':''}</div>
+        <div class="muted small">${[it.phone, it.email].filter(Boolean).map(esc).join(' · ') || 'No contact'}</div>
+      </div>
+      <button class="btn small" data-act="move-item" data-id="${t.id}" data-iid="${it.id}" data-dir="-1">↑</button>
+      <button class="btn small" data-act="move-item" data-id="${t.id}" data-iid="${it.id}" data-dir="1">↓</button>
+      <button class="btn small" data-act="edit-item" data-id="${t.id}" data-iid="${it.id}">✎</button>
+      <button class="btn small danger" data-act="delete-item" data-id="${t.id}" data-iid="${it.id}">✕</button>
+    </div>`).join('');
+  return `
+    <div class="topbar">
+      <button class="btn small" data-act="nav" data-to="templates">←</button>
+      <h1>${esc(t.name)}</h1>
+      <button class="btn small" data-act="edit-template" data-id="${t.id}">✎</button>
+    </div>
+    <div class="pad">
+      <button class="btn primary block" data-act="create-from-template" data-id="${t.id}">Create event from this template</button>
+      <button class="btn block" data-act="add-item" data-id="${t.id}">+ Add person</button>
+      ${t.items.length ? rows : `<div class="empty">No items yet.</div>`}
+      <button class="btn block danger mt12" data-act="delete-template" data-id="${t.id}">Delete template</button>
+    </div>`;
+}
+
+function viewSettings(){
+  return `
+    <div class="topbar"><h1>Settings</h1></div>
+    <div class="pad">
+      <div class="card">
+        <label>Currency symbol
+          <select data-act="set-currency">
+            ${['£','$','€','GH₵','₦','R','KSh'].map(c =>
+              `<option value="${c}" ${state.settings.currency===c?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </label>
+      </div>
+      ${canShowInstallButton()
+        ? `<button class="btn primary block" data-act="install-app">📲 Install app</button>`
+        : isStandalone()
+          ? `<div class="note" style="display:flex;align-items:center;gap:8px"><span>✓</span><span class="muted small">App installed</span></div>`
+          : ''}
+      <div class="card">
+        <div class="title">Cloud sync (Supabase)</div>
+        <div class="muted small" style="margin-bottom:10px">
+          ${window.Cloud?.getUser()
+            ? `Signed in as <b>${esc(window.Cloud.getUser().email || 'user')}</b>`
+            : 'Not signed in'}
+        </div>
+        <label>Supabase URL
+          <input id="sb_url" value="${esc(state.settings.supabase?.url || '')}" placeholder="https://xxxx.supabase.co">
+        </label>
+        <label>Anon key
+          <input id="sb_key" value="${esc(state.settings.supabase?.anonKey || '')}" placeholder="eyJhbGciOi...">
+        </label>
+        <div class="row gap">
+          <button class="btn" data-act="sb-save">Save keys</button>
+          ${window.Cloud?.getUser()
+            ? `<button class="btn danger" data-act="sb-signout">Sign out</button>`
+            : `<button class="btn primary" data-act="sb-signin">Sign in (magic link)</button>`}
+        </div>
+      </div>
+      <button class="btn block" data-act="export-all">Export all data (JSON backup)</button>
+      <button class="btn block" data-act="import-json">Import backup</button>
+      <button class="btn block danger" data-act="clear-data">Clear all data</button>
+      <div class="note mt12">All data is stored on this device only. Export a backup regularly.</div>
+    </div>`;
+}
+
+/* ============================================================
+   Modals
+   ============================================================ */
+function eventModal(ev){
+  const isNew = !ev;
+  const e = ev || { name:'', eventDate:'', deadlineAt:'', totalTransportCost:0,
+                    pricingMode:'auto', manualSeatPrice:0, roundingMode:'none',
+                    noShowMode:'none', noShowUnits:1, noShowPercent:10 };
+  showModal(`
+    <h2>${isNew ? 'New event' : 'Edit event'}</h2>
+    <form>
+      <label>Event name<input id="f_name" required value="${esc(e.name)}"></label>
+      <label>Event date<input type="date" id="f_date" value="${e.eventDate || ''}"></label>
+      <label>Entry deadline<input type="datetime-local" id="f_deadline" value="${toLocalInput(e.deadlineAt)}"></label>
+      <label>Total transport cost<input type="number" step="0.01" min="0" id="f_cost" value="${e.totalTransportCost || 0}"></label>
+      <label>Pricing mode
+        <select id="f_mode" onchange="document.getElementById('manualWrap').style.display=this.value==='manual'?'':'none'">
+          <option value="auto" ${e.pricingMode==='auto'?'selected':''}>Automatic (split total cost)</option>
+          <option value="manual" ${e.pricingMode==='manual'?'selected':''}>Manual price per seat</option>
+        </select>
+      </label>
+      <label id="manualWrap" style="display:${e.pricingMode==='manual'?'':'none'}">Manual seat price
+        <input type="number" step="0.01" min="0" id="f_manual" value="${e.manualSeatPrice || 0}"></label>
+      <label class="check"><input type="checkbox" id="f_round" ${e.roundingMode==='ceil'?'checked':''}> Round prices up to whole numbers</label>
+      <label>Fail-safe buffer
+        <select id="f_buffer" onchange="
+          document.getElementById('unitsWrap').style.display=this.value==='units'?'':'none';
+          document.getElementById('percentWrap').style.display=this.value==='percent'?'':'none';
+          document.getElementById('atRiskHint').style.display=this.value==='atRisk'?'':'none';">
+          <option value="none" ${e.noShowMode==='none'?'selected':''}>None</option>
+          <option value="atRisk" ${e.noShowMode==='atRisk'?'selected':''}>Auto from at-risk names</option>
+          <option value="units" ${e.noShowMode==='units'?'selected':''}>Seat units held back</option>
+          <option value="percent" ${e.noShowMode==='percent'?'selected':''}>Percent of seat units</option>
+        </select>
+      </label>
+      <div id="atRiskHint" class="muted small" style="display:${e.noShowMode==='atRisk'?'':'none'};margin-top:-8px;margin-bottom:12px">
+        Flag "at-risk" passengers on the roster to set the buffer automatically.
+      </div>
+      <label id="unitsWrap" style="display:${e.noShowMode==='units'?'':'none'}">Units held back
+        <input type="number" step="0.5" min="0" id="f_units" value="${e.noShowUnits || 1}">
+        <div class="muted small" style="font-weight:400;margin-top:4px">1 adult = 1 unit · 1 kid = 0.5 unit</div>
+      </label>
+      <label id="percentWrap" style="display:${e.noShowMode==='percent'?'':'none'}">Percent held back
+        <input type="number" step="1" min="0" max="50" id="f_percent" value="${e.noShowPercent || 10}"></label>
+      <div class="row gap mt12">
+        <button type="button" class="btn" data-act="close-modal">Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>
+  `, () => {
+    const name = val('f_name').trim();
+    if (!name) { alert('Name required'); return; }
+    const data = {
+      name,
+      eventDate: val('f_date') || null,
+      deadlineAt: fromLocalInput(val('f_deadline')),
+      totalTransportCost: num(val('f_cost')),
+      pricingMode: val('f_mode'),
+      manualSeatPrice: num(val('f_manual')),
+      roundingMode: checked('f_round') ? 'ceil' : 'none',
+      noShowMode: val('f_buffer'),
+      noShowUnits: num(val('f_units')),
+      noShowPercent: num(val('f_percent'))
+    };
+    if (isNew) {
+      const ev2 = Object.assign({
+        id: uid(), status: 'open', createdAt: nowISO(), updatedAt: nowISO(),
+        passengers: [], payments: []
+      }, data);
+      state.events.push(ev2);
+      logActivity(ev2, 'event.created', { name: ev2.name });
+      markDirty(ev2);
+      state.view = { name: 'event', id: ev2.id, tab: 'roster', filter: 'all' };
+    } else {
+      Object.assign(ev, data, { updatedAt: nowISO() });
+      markDirty(ev);
+      logActivity(ev, 'event.updated', {});
+    }
+    closeModal(); persistAndRender();
+  });
+}
+
+function passengerModal(ev, p){
+  const isNew = !p;
+  const x = p || { name:'', phone:'', email:'', notes:'', isKid:false, atRisk:false, seatPriceOverride:null };
+  showModal(`
+    <h2>${isNew ? 'Add person' : 'Edit person'}</h2>
+    <form>
+      <label>Name<input id="p_name" required value="${esc(x.name)}"></label>
+      <label>Phone<input type="tel" id="p_phone" value="${esc(x.phone || '')}"></label>
+      <label>Email<input type="email" id="p_email" value="${esc(x.email || '')}"></label>
+      <label>Notes<input id="p_notes" value="${esc(x.notes || '')}"></label>
+      <label class="check"><input type="checkbox" id="p_kid" ${x.isKid?'checked':''}> Kid (pays half seat price)</label>
+      <label class="check"><input type="checkbox" id="p_atRisk" ${x.atRisk?'checked':''}> At-risk (might not show — feeds the buffer)</label>
+      <label>Seat price override — optional
+        <input type="number" step="0.01" min="0" id="p_override" value="${x.seatPriceOverride != null ? x.seatPriceOverride : ''}"></label>
+      <div class="row gap mt12">
+        <button type="button" class="btn" data-act="close-modal">Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>
+  `, () => {
+    const name = val('p_name').trim();
+    if (!name) { alert('Name required'); return; }
+    const ovRaw = val('p_override');
+    const data = {
+      name,
+      phone: val('p_phone').trim(),
+      email: val('p_email').trim(),
+      notes: val('p_notes').trim(),
+      isKid: checked('p_kid'),
+      atRisk: checked('p_atRisk'),
+      seatPriceOverride: ovRaw === '' ? null : Number(ovRaw)
+    };
+    if (isNew) {
+      const nextNum = ev.passengers.reduce((m, p) => Math.max(m, p.listNumber || 0), 0) + 1;
+      ev.passengers.push(Object.assign({
+        id: uid(), listNumber: nextNum,
+        addedAt: nowISO(), updatedAt: nowISO()
+      }, data));
+      logActivity(ev, 'passenger.added', { name, isKid: data.isKid });
+    } else {
+      const before = { name: p.name, phone: p.phone, email: p.email, notes: p.notes,
+                       isKid: p.isKid, atRisk: !!p.atRisk,
+                       seatPriceOverride: p.seatPriceOverride };
+      const after  = { name: data.name, phone: data.phone, email: data.email, notes: data.notes,
+                       isKid: data.isKid, atRisk: !!data.atRisk,
+                       seatPriceOverride: data.seatPriceOverride };
+      const ts = nowISO();
+      if (!Array.isArray(p.editHistory)) p.editHistory = [];
+      for (const k of Object.keys(after)) {
+        if (String(before[k] ?? '') !== String(after[k] ?? '')) {
+          p.editHistory.push({ field: k, oldValue: before[k], newValue: after[k], at: ts });
+        }
+      }
+      Object.assign(p, data, { updatedAt: ts });
+      logActivity(ev, 'passenger.updated', { name });
+    }
+    ev.updatedAt = nowISO();
+    markDirty(ev);
+    closeModal(); persistAndRender();
+  });
+}
+
+function passengerDetailModal(ev, p){
+  const pr = calcPricing(ev);
+  const due = personDue(p, pr.base, pr.kid);
+  const paid = paidFor(ev, p.id);
+  const pays = ev.payments.filter(x => x.passengerId === p.id)
+    .sort((a,b)=>String(b.recordedAt).localeCompare(String(a.recordedAt)));
+
+  const history = (p.editHistory && p.editHistory.length)
+    ? `<div class="section mt12"><h3>Edit history</h3>${
+        [...p.editHistory].sort((a, b) => String(b.at).localeCompare(String(a.at))).map(h => `
+          <div class="kv">
+            <span>${fmtDate(h.at)} · ${esc(h.field)}: ${esc(fmtHistoryValue(h.field, h.oldValue))} → <b>${esc(fmtHistoryValue(h.field, h.newValue))}</b></span>
+          </div>`).join('')}</div>`
+    : '';
+
+  const actions = canEdit(ev)
+    ? `<div class="row gap mt12">
+         <button class="btn" data-act="edit-passenger" data-eid="${ev.id}" data-id="${p.id}">Edit</button>
+         <button class="btn primary grow" data-act="record-payment-for" data-eid="${ev.id}" data-id="${p.id}">Record payment</button>
+       </div>
+       ${p.deletedAt
+         ? `<div class="note warn mt12">Removed ${fmtDate(p.deletedAt)}</div>
+            <button class="btn primary block" data-act="restore-passenger" data-eid="${ev.id}" data-id="${p.id}">Restore to list</button>`
+         : `<button class="btn danger block mt12" data-act="delete-passenger" data-eid="${ev.id}" data-id="${p.id}">Remove from list</button>`}`
+    : `<div class="note" style="display:flex;align-items:center;gap:8px;margin-top:12px"><span>👁</span><span class="muted small">Read-only view</span></div>`;
+
+  showModal(`
+    <h2>${esc(p.name)}</h2>
+    <div class="card">
+      <div class="kv"><span>List number</span><b>#${p.listNumber}</b></div>
+      <div class="kv"><span>Added</span><b>${fmtDate(p.addedAt)}</b></div>
+      <div class="kv"><span>Late?</span><b style="color:${isLate(ev,p)?'var(--warn)':'var(--ok)'}">${isLate(ev,p)?'Yes':'No'}</b></div>
+      <div class="kv"><span>At-risk?</span><b style="color:${p.atRisk?'var(--warn)':'var(--muted)'}">${p.atRisk?'Yes — counted in buffer':'No'}</b></div>
+      <div class="kv"><span>Type</span><b>${p.isKid?'Kid':'Adult'}</b></div>
+      <div class="kv"><span>Due</span><b>${money(due)}</b></div>
+      <div class="kv"><span>Paid</span><b>${money(paid)}</b></div>
+      <div class="kv"><span>Balance</span><b>${money(due - paid)}</b></div>
+      ${p.phone ? `<div class="kv"><span>Phone</span><b>${esc(p.phone)}</b></div>` : ''}
+      ${p.email ? `<div class="kv"><span>Email</span><b>${esc(p.email)}</b></div>` : ''}
+      ${p.notes ? `<div class="kv"><span>Notes</span><b>${esc(p.notes)}</b></div>` : ''}
+    </div>
+    ${pays.length ? `<div class="section"><h3>Payments</h3>${pays.map(x=>`
+      <div class="kv"><span>${fmtDate(x.recordedAt)} · ${esc(x.method)}${x.note?' · '+esc(x.note):''}</span><b>${money(x.amount)}</b></div>`).join('')}</div>` : ''}
+    ${history}
+    ${actions}
+  `);
+}
+
+function paymentModal(ev, existing, presetPid){
+  const isNew = !existing;
+  const pax = ev.passengers.filter(p => !p.deletedAt).sort((a,b)=>a.listNumber-b.listNumber);
+  const pr = calcPricing(ev);
+  const methods = ['cash','transfer','other'];
+  const curMethod = existing ? existing.method : 'cash';
+  showModal(`
+    <h2>${isNew ? 'Record payment' : 'Edit payment'}</h2>
+    <form>
+      ${isNew ? `<label>Person
+        <select id="pay_pax">${pax.map(x => `
+          <option value="${x.id}" ${x.id===presetPid?'selected':''}>#${x.listNumber} ${esc(x.name)} — due ${money(personDue(x, pr.base, pr.kid))}</option>`).join('')}
+        </select></label>`
+      : `<div class="muted small" style="margin-bottom:12px">Person: ${esc(pax.find(x=>x.id===existing.passengerId)?.name || 'Unknown')}</div>`}
+      <label>Amount<input type="number" step="0.01" min="0" id="pay_amount" required value="${isNew ? '' : existing.amount}"></label>
+      <label>Method<select id="pay_method">
+        ${methods.map(m => `<option value="${m}" ${curMethod===m?'selected':''}>${m[0].toUpperCase()+m.slice(1)}</option>`).join('')}
+      </select></label>
+      <label>Note<input id="pay_note" value="${isNew ? '' : esc(existing.note || '')}"></label>
+      <div class="muted small" style="margin-bottom:12px">
+        ${isNew ? `Recorded at: ${fmtDate(nowISO())}`
+                : `Recorded at: ${fmtDate(existing.recordedAt)}${existing.editedAt ? ` · edited ${fmtDate(existing.editedAt)}` : ''}`}
+      </div>
+      <div class="row gap">
+        <button type="button" class="btn" data-act="close-modal">Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>
+  `, () => {
+    const amount = num(val('pay_amount'));
+    if (!(amount > 0)) { alert('Enter an amount'); return; }
+    const method = val('pay_method');
+    const note = val('pay_note').trim();
+    if (isNew) {
+      ev.payments.push({
+        id: uid(), passengerId: val('pay_pax'), amount, method, note,
+        recordedAt: nowISO(), editedAt: null, editHistory: []
+      });
+      const pname = ev.passengers.find(x => x.id === val('pay_pax'))?.name || 'unknown';
+      logActivity(ev, 'payment.added', { name: pname, amount, method });
+    } else {
+      const hist = existing.editHistory;
+      if (existing.amount !== amount) hist.push({ field:'amount', oldValue: existing.amount, newValue: amount, at: nowISO() });
+      if (existing.method !== method) hist.push({ field:'method', oldValue: existing.method, newValue: method, at: nowISO() });
+      if ((existing.note || '') !== note) hist.push({ field:'note', oldValue: existing.note || '', newValue: note, at: nowISO() });
+      existing.amount = amount;
+      existing.method = method;
+      existing.note = note;
+      existing.editedAt = nowISO();
+      const pname = ev.passengers.find(x => x.id === existing.passengerId)?.name || 'unknown';
+      logActivity(ev, 'payment.edited', { name: pname, amount, method });
+    }
+    ev.updatedAt = nowISO();
+    markDirty(ev);
+    closeModal(); persistAndRender();
+  });
+}
+
+function templateModal(t){
+  const isNew = !t;
+  const x = t || { name:'', description:'' };
+  showModal(`
+    <h2>${isNew ? 'New template' : 'Edit template'}</h2>
+    <form>
+      <label>Template name<input id="t_name" required value="${esc(x.name)}"></label>
+      <label>Description<input id="t_desc" value="${esc(x.description || '')}"></label>
+      <div class="row gap mt12">
+        <button type="button" class="btn" data-act="close-modal">Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>
+  `, () => {
+    const name = val('t_name').trim();
+    if (!name) { alert('Name required'); return; }
+    if (isNew) {
+      const tpl = { id: uid(), name, description: val('t_desc').trim(), createdAt: nowISO(), items: [] };
+      state.templates.push(tpl);
+      state.view = { name: 'template', id: tpl.id };
+    } else {
+      t.name = name;
+      t.description = val('t_desc').trim();
+    }
+    closeModal(); persistAndRender();
+  });
+}
+
+function templateItemModal(t, item){
+  const isNew = !item;
+  const x = item || { name:'', phone:'', email:'', defaultIsKid:false };
+  showModal(`
+    <h2>${isNew ? 'Add person' : 'Edit person'}</h2>
+    <form>
+      <label>Name<input id="ti_name" required value="${esc(x.name)}"></label>
+      <label>Phone<input type="tel" id="ti_phone" value="${esc(x.phone || '')}"></label>
+      <label>Email<input type="email" id="ti_email" value="${esc(x.email || '')}"></label>
+      <label class="check"><input type="checkbox" id="ti_kid" ${x.defaultIsKid?'checked':''}> Kid by default</label>
+      <div class="row gap mt12">
+        <button type="button" class="btn" data-act="close-modal">Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>
+  `, () => {
+    const name = val('ti_name').trim();
+    if (!name) { alert('Name required'); return; }
+    const data = { name, phone: val('ti_phone').trim(), email: val('ti_email').trim(), defaultIsKid: checked('ti_kid') };
+    if (isNew) t.items.push(Object.assign({ id: uid() }, data));
+    else Object.assign(item, data);
+    closeModal(); persistAndRender();
+  });
+}
+
+function createFromTemplateModal(tpl){
+  const itemChecks = tpl.items.map(it => `
+    <label class="check" style="margin-bottom:6px">
+      <input type="checkbox" class="tplitem" value="${it.id}" checked>
+      <span>${esc(it.name)}${it.defaultIsKid?' <span class="tag kid">Kid</span>':''}</span>
+    </label>`).join('');
+
+  showModal(`
+    <h2>New event from “${esc(tpl.name)}”</h2>
+    <form>
+      <label>Event name<input id="f_name" required value="${esc(tpl.name)}"></label>
+      <label>Event date<input type="date" id="f_date"></label>
+      <label>Entry deadline<input type="datetime-local" id="f_deadline"></label>
+      <label>Total transport cost<input type="number" step="0.01" min="0" id="f_cost" value="0"></label>
+      <label>Pricing mode<select id="f_mode">
+        <option value="auto">Automatic</option><option value="manual">Manual price per seat</option>
+      </select></label>
+      <label>Manual seat price<input type="number" step="0.01" min="0" id="f_manual" value="0"></label>
+      <label class="check"><input type="checkbox" id="f_round"> Round prices up</label>
+      <label>Fail-safe buffer<select id="f_buffer">
+        <option value="none">None</option>
+        <option value="atRisk">Auto from at-risk names</option>
+        <option value="units">Units</option>
+        <option value="percent">Percent</option>
+      </select></label>
+      <label>Units held back<input type="number" step="0.5" min="0" id="f_units" value="1"></label>
+      <div class="note">Select people to include (${tpl.items.length}):</div>
+      ${itemChecks || '<div class="muted small">This template has no items.</div>'}
+      <div class="row gap mt12">
+        <button type="button" class="btn" data-act="close-modal">Cancel</button>
+        <button type="submit" class="btn primary">Create event</button>
+      </div>
+    </form>
+  `, () => {
+    const name = val('f_name').trim();
+    if (!name) { alert('Name required'); return; }
+    const chosen = [...document.querySelectorAll('.tplitem:checked')].map(x => x.value);
+    const ev = {
+      id: uid(), name,
+      eventDate: val('f_date') || null,
+      deadlineAt: fromLocalInput(val('f_deadline')),
+      totalTransportCost: num(val('f_cost')),
+      pricingMode: val('f_mode'),
+      manualSeatPrice: num(val('f_manual')),
+      roundingMode: checked('f_round') ? 'ceil' : 'none',
+      noShowMode: val('f_buffer'),
+      noShowUnits: num(val('f_units')),
+      noShowPercent: 0,
+      status: 'open', createdAt: nowISO(), updatedAt: nowISO(),
+      passengers: [], payments: []
+    };
+    let n = 1;
+    for (const it of tpl.items) {
+      if (!chosen.includes(it.id)) continue;
+      ev.passengers.push({
+        id: uid(), listNumber: n++,
+        name: it.name, phone: it.phone || '', email: it.email || '',
+        notes: '', isKid: !!it.defaultIsKid, seatPriceOverride: null,
+        atRisk: false,
+        addedAt: nowISO(), updatedAt: nowISO()
+      });
+    }
+    state.events.push(ev);
+    logActivity(ev, 'event.created', { name: ev.name });
+    markDirty(ev);
+    state.view = { name: 'event', id: ev.id, tab: 'roster', filter: 'all' };
+    closeModal(); persistAndRender();
+  });
+}
+
+function shareModal(ev){
+  showModal(`
+    <h2>Share “${esc(ev.name)}”</h2>
+    <div id="shareList"><div class="muted small" style="margin-bottom:8px">Loading shares…</div></div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <div class="note">Create a new link. Anyone with it can sign in and use this event.</div>
+    <form>
+      <label class="check" style="margin-bottom:10px">
+        <input type="radio" name="shareRole" value="editor" checked>
+        <span><b>Editor</b> — add people, record payments, sync changes</span>
+      </label>
+      <label class="check" style="margin-bottom:16px">
+        <input type="radio" name="shareRole" value="viewer">
+        <span><b>Viewer</b> — read-only, sees roster and totals</span>
+      </label>
+      <div class="row gap">
+        <button type="button" class="btn" data-act="close-modal">Cancel</button>
+        <button type="submit" class="btn primary">Create link</button>
+      </div>
+    </form>
+  `, async () => {
+    const shareRole = document.querySelector('input[name="shareRole"]:checked')?.value || 'editor';
+    try {
+      const { slug } = await Cloud.createShare(ev, shareRole === 'editor');
+      const url = location.origin + location.pathname + '?share=' + slug;
+      try { await navigator.clipboard.writeText(url); } catch {}
+      logActivity(ev, 'share.created', { slug, role: shareRole });
+      await loadShares(ev);
+      prompt(`Share link (${shareRole}):`, url);
+    } catch (e) { alert('Share failed: ' + e.message); }
+  });
+  loadShares(ev);
+}
+
+async function loadShares(ev){
+  const list = document.getElementById('shareList');
+  if (!list) return;
+  if (!window.Cloud?.getUser()) {
+    list.innerHTML = '<div class="muted small" style="margin-bottom:8px">Sign in to manage shares.</div>';
+    return;
+  }
+  try {
+    const shares = await Cloud.listShares(ev);
+    if (!document.getElementById('shareList')) return;
+    if (!shares.length) {
+      list.innerHTML = '<div class="muted small" style="margin-bottom:8px">No active shares yet.</div>';
+      return;
+    }
+    list.innerHTML = `
+      <div class="title" style="font-size:13.5px;margin-bottom:8px">Active shares (${shares.length})</div>
+      ${shares.map(s => `
+        <div class="listrow" style="margin-bottom:6px">
+          <div class="grow" style="min-width:0">
+            <div style="font-weight:600;font-size:13.5px">
+              ${s.can_edit ? '✎ Editor' : '👁 Viewer'}
+              ${s.is_mine ? '<span class="tag" style="background:#eef3fa;color:#2b4a6f">you</span>' : ''}
+            </div>
+            <div class="muted small" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              ${s.viewer_email ? esc(s.viewer_email) + ' · ' : ''}
+              created ${relativeTime(s.created_at)}
+              · ${s.last_viewed_at ? 'viewed ' + relativeTime(s.last_viewed_at) : 'never viewed'}
+            </div>
+          </div>
+          <button class="btn small danger" data-act="revoke-share" data-slug="${s.slug}" title="Revoke this share">Revoke</button>
+        </div>
+      `).join('')}
+    `;
+  } catch (e) {
+    if (document.getElementById('shareList')) {
+      list.innerHTML = `<div class="note warn">Could not load shares: ${esc(e.message)}</div>`;
+    }
+  }
+}
+
+/* ============================================================
+   CSV import
+   ============================================================ */
+let importDraft = null;
+function importCSVModal(ev){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.csv,text/csv';
+  inp.onchange = () => {
+    const file = inp.files[0];
+    if (!file) return;
+    const r = new FileReader();
+    r.onload = () => {
+      const result = parseRosterCSV(r.result);
+      if (!result.rows.length) {
+        alert(result.issues.join('\n') || 'Nothing to import.');
+        return;
+      }
+      importDraft = { evId: ev.id, rows: result.rows, issues: result.issues, headers: result.headers };
+      renderImportPreview();
+    };
+    r.readAsText(file);
+  };
+  inp.click();
+}
+
+function renderImportPreview(){
+  const d = importDraft;
+  if (!d) return;
+  const ev = state.events.find(x => x.id === d.evId);
+  if (!ev) { closeModal(); return; }
+  const valid = d.rows.filter(r => r.name);
+  const selected = d.rows.filter(r => r.include).length;
+  const rowsHtml = d.rows.map((r, i) => `
+    <tr>
+      <td style="width:26px"><input type="checkbox" class="csv-row" data-i="${i}" ${r.include ? 'checked' : ''}></td>
+      <td>${esc(r.name)}${r.isKid ? ' <span class="tag kid">Kid</span>' : ''}${r.atRisk ? ' <span class="tag" style="background:#fef3e2;color:#92400e">Risk</span>' : ''}</td>
+      <td class="muted small">${esc(r.phone || '—')}</td>
+      <td class="muted small">${esc(r.email || '—')}</td>
+    </tr>`).join('');
+
+  showModal(`
+    <h2>Import ${valid.length} passenger${valid.length === 1 ? '' : 's'}</h2>
+    <div class="muted small" style="margin-bottom:10px">
+      Detected headers: ${(d.headers || []).map(esc).join(', ')}
+    </div>
+    ${d.issues.length ? `<div class="note warn">${d.issues.map(esc).join('<br>')}</div>` : ''}
+    <div style="max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:10px">
+      <table class="tbl" style="font-size:13px">
+        <thead><tr><th></th><th>Name</th><th>Phone</th><th>Email</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>
+    <div class="row gap mt12">
+      <button type="button" class="btn" data-act="close-modal">Cancel</button>
+      <button type="button" class="btn primary grow" data-act="commit-import" data-id="${ev.id}" ${selected === 0 ? 'disabled' : ''}>
+        Import ${selected} passenger${selected === 1 ? '' : 's'}
+      </button>
+    </div>
+  `);
+
+  document.querySelectorAll('.csv-row').forEach(cb => {
+    cb.addEventListener('change', () => {
+      importDraft.rows[Number(cb.dataset.i)].include = cb.checked;
+      const c = importDraft.rows.filter(r => r.include).length;
+      const btn = document.querySelector('[data-act="commit-import"]');
+      if (btn) { btn.textContent = `Import ${c} passenger${c === 1 ? '' : 's'}`; btn.disabled = c === 0; }
+    });
+  });
+}
+
+/* ============================================================
+   Export / import / print / copy
+   ============================================================ */
+function download(filename, text, type = 'text/csv'){
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+function csvCell(v){
+  const s = String(v ?? '');
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function parseCSV(text){
+  const rows = [];
+  let row = [], cell = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { cell += '"'; i++; }
+        else inQ = false;
+      } else cell += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === ',') { row.push(cell); cell = ''; }
+      else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+      else if (c === '\r') { /* skip */ }
+      else cell += c;
+    }
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.length && r.some(x => String(x).trim() !== ''));
+}
+function mapCSVHeaders(headers){
+  const norm = s => String(s || '').trim().toLowerCase().replace(/[^a-z]/g, '');
+  const map = {};
+  headers.forEach((h, i) => {
+    const n = norm(h);
+    if (['name','fullname','person','passenger'].includes(n)) map.name = i;
+    else if (['phone','tel','telephone','mobile','number','contact'].includes(n)) map.phone = i;
+    else if (['email','mail'].includes(n)) map.email = i;
+    else if (['kid','child','iskid','kids','youth'].includes(n)) map.kid = i;
+    else if (['notes','note','comment'].includes(n)) map.notes = i;
+    else if (['atrisk','risk','atriskflag'].includes(n)) map.atRisk = i;
+  });
+  return map;
+}
+function csvBool(v){
+  const s = String(v ?? '').trim().toLowerCase();
+  return ['1','y','yes','true','t','kid','child','x'].includes(s);
+}
+function parseRosterCSV(text){
+  const rows = parseCSV(text);
+  if (rows.length < 2) return { rows: [], issues: ['File has no data rows.'] };
+  const headers = rows[0];
+  const map = mapCSVHeaders(headers);
+  const issues = [];
+  if (map.name === undefined) {
+    return { rows: [], issues: ['Could not find a "Name" column. First row must include a "name" header.'] };
+  }
+  const out = [];
+  for (let r = 1; r < rows.length; r++) {
+    const row = rows[r];
+    const name = String(row[map.name] ?? '').trim();
+    if (!name) { issues.push(`Row ${r + 1}: skipped — no name.`); continue; }
+    out.push({
+      name,
+      phone: map.phone !== undefined ? String(row[map.phone] ?? '').trim() : '',
+      email: map.email !== undefined ? String(row[map.email] ?? '').trim() : '',
+      notes: map.notes !== undefined ? String(row[map.notes] ?? '').trim() : '',
+      isKid: map.kid !== undefined ? csvBool(row[map.kid]) : false,
+      atRisk: map.atRisk !== undefined ? csvBool(row[map.atRisk]) : false,
+      include: true
+    });
+  }
+  return { rows: out, issues, headers };
+}
+function exportRosterCSV(ev, filterIds){
+  const pr = calcPricing(ev);
+  const set = filterIds ? new Set(filterIds) : null;
+  const rows = [['Number','Name','Kid','At-risk','Phone','Email','Added at','Late','Due','Paid','Balance','Override','Edit history']];
+  for (const p of ev.passengers.filter(x => !x.deletedAt).filter(x => !set || set.has(x.id)).sort((a,b)=>a.listNumber-b.listNumber)) {
+    const due = personDue(p, pr.base, pr.kid);
+    const paid = paidFor(ev, p.id);
+    const history = (p.editHistory || [])
+      .map(h => `${h.field}: ${fmtHistoryValue(h.field, h.oldValue)} -> ${fmtHistoryValue(h.field, h.newValue)} @ ${h.at}`)
+      .join(' | ');
+    rows.push([
+      p.listNumber, p.name, p.isKid ? 'Yes' : 'No', p.atRisk ? 'Yes' : 'No', p.phone || '', p.email || '',
+      p.addedAt, isLate(ev, p) ? 'Yes' : 'No',
+      due.toFixed(2), paid.toFixed(2), (due - paid).toFixed(2),
+      p.seatPriceOverride != null ? p.seatPriceOverride : '',
+      history
+    ]);
+  }
+  rows.push([]);
+  rows.push(['Pricing assumptions']);
+  rows.push(['Seat units', pr.U]);
+  rows.push(['Buffer units', pr.B]);
+  rows.push(['Divisor', pr.D]);
+  rows.push(['Raw base price', pr.rawBase.toFixed(4)]);
+  rows.push(['Base seat price', pr.base]);
+  rows.push(['Kid seat price', pr.kid]);
+  rows.push(['Rounding', ev.roundingMode === 'ceil' ? 'Up to whole' : 'None']);
+  rows.push(['Pricing mode', ev.pricingMode]);
+  rows.push(['Total transport cost', pr.totalCost]);
+  rows.push(['Expected collected', pr.expected]);
+  rows.push(['Buffer held', pr.surplus]);
+  rows.push(['No-show tolerance (adults)', pr.tolerance]);
+  const suffix = set ? `-selection-${set.size}` : '';
+  download(`${slug(ev.name)}-roster${suffix}.csv`, rows.map(r => r.map(csvCell).join(',')).join('\n'));
+}
+function exportPaymentsCSV(ev){
+  const nameOf = id => ev.passengers.find(p => p.id === id)?.name || 'Unknown';
+  const rows = [['Recorded at','Edited at','Person','Amount','Method','Note','Edit history']];
+  for (const p of [...ev.payments].sort((a,b)=>String(a.recordedAt).localeCompare(String(b.recordedAt)))) {
+    rows.push([
+      p.recordedAt, p.editedAt || '', nameOf(p.passengerId),
+      num(p.amount).toFixed(2), p.method, p.note || '',
+      (p.editHistory || []).map(h => `${h.field}: ${h.oldValue} -> ${h.newValue} @ ${h.at}`).join(' | ')
+    ]);
+  }
+  download(`${slug(ev.name)}-payments.csv`, rows.map(r => r.map(csvCell).join(',')).join('\n'));
+}
+function exportEventJSON(ev){
+  download(`${slug(ev.name)}.json`, JSON.stringify(ev, null, 2), 'application/json');
+}
+function printEvent(ev){
+  const pr = calcPricing(ev);
+  const pax = ev.passengers.filter(p => !p.deletedAt).sort((a,b)=>a.listNumber-b.listNumber);
+  const rows = pax.map(p => {
+    const due = personDue(p, pr.base, pr.kid);
+    const paid = paidFor(ev, p.id);
+    return `<tr>
+      <td>${p.listNumber}</td><td>${esc(p.name)}${p.isKid?' (kid)':''}</td>
+      <td>${esc(p.phone||'')}</td><td>${fmtDate(p.addedAt)}</td>
+      <td>${isLate(ev,p)?'Late':''}</td>
+      <td style="text-align:right">${money(due)}</td>
+      <td style="text-align:right">${money(paid)}</td>
+      <td style="text-align:right">${money(due-paid)}</td>
+    </tr>`;
+  }).join('');
+  const w = window.open('', '_blank');
+  if (!w) { alert('Allow pop-ups to print.'); return; }
+  w.document.write(`<!DOCTYPE html><html><head><title>${esc(ev.name)}</title>
+    <style>
+      body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;padding:24px;color:#14202e}
+      h1{margin:0 0 4px;font-size:22px}
+      .sub{color:#6b7a8d;margin-bottom:18px}
+      table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px}
+      th,td{border-bottom:1px solid #e2e8f0;padding:7px 6px;text-align:left}
+      th{background:#f0f4f9;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#6b7a8d}
+      .sum{font-size:13px;background:#f4f6f9;padding:12px;border-radius:8px}
+      .sum div{display:flex;justify-content:space-between;padding:3px 0}
+    </style></head><body>
+    <h1>${esc(ev.name)}</h1>
+    <div class="sub">${fmtDateOnly(ev.eventDate)} · deadline ${fmtDate(ev.deadlineAt)}</div>
+    <table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Added</th><th>Late</th><th style="text-align:right">Due</th><th style="text-align:right">Paid</th><th style="text-align:right">Balance</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <div class="sum">
+      <div><span>Seat units / divisor</span><b>${pr.U} / ${pr.D}</b></div>
+      <div><span>Base seat price (kid)</span><b>${money(pr.base)} (${money(pr.kid)})</b></div>
+      <div><span>Rounding</span><b>${ev.roundingMode==='ceil'?'Up to whole':'None'}</b></div>
+      <div><span>Fail-safe buffer</span><b>${ev.noShowMode==='none'?'Off':(pr.B+' units')}</b></div>
+      <div><span>Total transport cost</span><b>${money(pr.totalCost)}</b></div>
+      <div><span>Expected collected</span><b>${money(pr.expected)}</b></div>
+      <div><span>Buffer held</span><b>${money(pr.surplus)}</b></div>
+      <div><span>Covers adult no-shows</span><b>${pr.tolerance}</b></div>
+    </div>
+    </body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 250);
+}
+function importJSON(){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = () => {
+    const file = inp.files[0]; if (!file) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const data = JSON.parse(r.result);
+        if (!data.events || !Array.isArray(data.events)) throw new Error('Not a backup file');
+        if (!confirm('Replace all current data with this backup?')) return;
+        state = Object.assign(defaultState(), data);
+        state.view = { name: 'events' };
+        persistAndRender();
+      } catch (err) { alert('Import failed: ' + err.message); }
+    };
+    r.readAsText(file);
+  };
+  inp.click();
+}
+function formatRosterText(ev){
+  const pr = calcPricing(ev);
+  const list = ev.passengers.filter(p => !p.deletedAt).sort((a, b) => a.listNumber - b.listNumber);
+  const collected = ev.payments.reduce((s, p) => s + num(p.amount), 0);
+  const outstanding = Math.max(0, pr.expected - collected);
+  const lines = [];
+  lines.push(`📋 ${ev.name}`);
+  if (ev.eventDate) lines.push(`🗓  ${fmtDateOnly(ev.eventDate)}`);
+  if (ev.deadlineAt) lines.push(`⏰ Entry deadline: ${fmtDate(ev.deadlineAt)}`);
+  lines.push(`💺 ${list.length} people · ${money(pr.base)}/seat · Kids ${money(pr.kid)}`);
+  lines.push('');
+  for (const p of list) {
+    const due = personDue(p, pr.base, pr.kid);
+    const paid = paidFor(ev, p.id);
+    const bal = due - paid;
+    const badges = [];
+    if (p.isKid) badges.push('kid');
+    if (isLate(ev, p)) badges.push('late');
+    let status;
+    if (paid >= due - 0.005) status = '✅ Paid';
+    else if (paid > 0.005) status = `⏳ Due ${money(bal)}`;
+    else status = '❌ Unpaid';
+    lines.push(`#${p.listNumber} ${p.name}${badges.length ? ` (${badges.join(', ')})` : ''} — ${money(due)} — ${status}`);
+  }
+  lines.push('');
+  lines.push(`💰 Expected ${money(pr.expected)}`);
+  lines.push(`✅ Collected ${money(collected)}`);
+  if (outstanding > 0.005) lines.push(`⏳ Outstanding ${money(outstanding)}`);
+  return lines.join('\n');
+}
+async function copyToClipboard(text){
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (_) {}
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok;
+  } catch (_) { return false; }
+}
+
+/* ============================================================
+   Pointer handlers (long-press + swipe)
+   ============================================================ */
+let longPressTimer = null;
+let longPressTarget = null;
+let suppressNextClick = false;
+let swipe = null;
+
+function cancelLongPress(){
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; longPressTarget = null; }
+}
+function resetSwipe(){
+  if (!swipe) return;
+  swipe.wrap?.classList.remove('swiping');
+  if (swipe.row) swipe.row.style.transform = '';
+  swipe = null;
+}
+
+document.addEventListener('pointerdown', e => {
+  if (bulkMode) return;
+  const row = e.target.closest('.listrow[data-eid]');
+  if (!row) return;
+  if (e.target.closest('[data-act="quick-pay"]')) return;
+  const pid = row.dataset.id;
+  const eid = row.dataset.eid;
+  if (!pid || !eid) return;
+  const evCheck = state.events.find(x => x.id === eid);
+  if (evCheck && !canEdit(evCheck)) return;
+
+  swipe = {
+    startX: e.clientX, startY: e.clientY,
+    wrap: row.closest('.swipe-wrap'),
+    row, eid, pid,
+    axis: null, offset: 0, active: true
+  };
+
+  longPressTarget = { eid, pid };
+  longPressTimer = setTimeout(() => {
+    const ev = state.events.find(x => x.id === eid);
+    const p = ev?.passengers.find(x => x.id === pid);
+    if (ev && p && !p.deletedAt) {
+      const wasAtRisk = !!p.atRisk;
+      p.atRisk = !p.atRisk;
+      const ts = nowISO();
+      p.updatedAt = ts;
+      if (!Array.isArray(p.editHistory)) p.editHistory = [];
+      p.editHistory.push({ field: 'atRisk', oldValue: wasAtRisk, newValue: p.atRisk, at: ts });
+      ev.updatedAt = ts;
+      markDirty(ev);
+      logActivity(ev, p.atRisk ? 'passenger.atRisk.on' : 'passenger.atRisk.off', { name: p.name });
+      suppressNextClick = true;
+      persistAndRender();
+      showToast(p.atRisk ? `${esc(p.name)} marked at-risk` : `${esc(p.name)} no longer at-risk`);
+    }
+    if (swipe) swipe.active = false;
+    swipe = null;
+    longPressTimer = null;
+    longPressTarget = null;
+  }, 500);
+});
+
+document.addEventListener('pointermove', e => {
+  if (!swipe || !swipe.active) return;
+  const dx = e.clientX - swipe.startX;
+  const dy = e.clientY - swipe.startY;
+  if (!swipe.axis) {
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+      swipe.axis = 'h';
+      cancelLongPress();
+      swipe.wrap?.classList.add('swiping');
+    } else if (Math.abs(dy) > 10) {
+      swipe.axis = 'v';
+      cancelLongPress();
+    } else {
+      return;
+    }
+  }
+  if (swipe.axis === 'h' && swipe.row) {
+    const offset = Math.max(-110, Math.min(0, dx));
+    swipe.offset = offset;
+    swipe.row.style.transform = `translateX(${offset}px)`;
+  }
+}, { passive: true });
+
+document.addEventListener('pointerup', () => {
+  cancelLongPress();
+  if (!swipe) return;
+  const s = swipe;
+  swipe = null;
+  if (!s.wrap) { if (s.row) s.row.style.transform = ''; return; }
+  s.wrap.classList.remove('swiping');
+  if (s.row) s.row.style.transform = '';
+
+  if (s.axis === 'h' && s.offset < -60) {
+    const ev = state.events.find(x => x.id === s.eid);
+    const p = ev?.passengers.find(x => x.id === s.pid);
+    if (ev && p && softDeletePassenger(ev, p)) {
+      suppressNextClick = true;
+      logActivity(ev, 'passenger.removed', { name: p.name, pid: p.id });
+      persistAndRender();
+      showUndoToast(ev, p);
+    }
+  }
+});
+
+document.addEventListener('pointercancel', () => { cancelLongPress(); resetSwipe(); });
+
+/* ============================================================
+   Click / change delegation
+   ============================================================ */
+document.addEventListener('click', async e => {
+  if (suppressNextClick) { suppressNextClick = false; e.preventDefault(); e.stopPropagation(); return; }
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  if (el.classList.contains('overlay') && e.target !== el) return;
+
+  const act = el.dataset.act;
+  if (!guardReadOnly(act, el)) return;
+  const id = el.dataset.id;
+  const eid = el.dataset.eid;
+
+  switch (act) {
+    case 'nav':           exitBulk(); state.view = { name: el.dataset.to }; persistAndRender(); break;
+    case 'open-event':    exitBulk(); state.view = { name: 'event', id, tab: 'roster', filter: 'all' }; persistAndRender(); break;
+    case 'tab':           exitBulk(); state.view.tab = el.dataset.tab; persistAndRender(); break;
+    case 'filter':        bulkSelection.clear(); state.view.filter = el.dataset.filter; persistAndRender(); break;
+    case 'density':       state.settings.rosterDensity = el.dataset.mode === 'compact' ? 'compact' : 'detailed'; save(); render(); break;
+
+    case 'toggle-select': bulkMode = !bulkMode; bulkSelection.clear(); persistAndRender(); break;
+    case 'toggle-select-one': {
+      const pid = el.dataset.id;
+      if (!pid) return;
+      if (bulkSelection.has(pid)) bulkSelection.delete(pid); else bulkSelection.add(pid);
+      render(); break;
+    }
+    case 'bulk-select-all': {
+      const ev = state.events.find(x => x.id === state.view.id);
+      if (!ev) return;
+      const pr = calcPricing(ev);
+      const filtered = filterPassengers(ev, state.view.filter || 'all', pr);
+      const visible = filtered.map(p => p.id);
+      if (bulkSelection.size === visible.length && visible.length > 0) bulkSelection.clear();
+      else bulkSelection = new Set(visible);
+      render(); break;
+    }
+    case 'bulk-mark-paid': {
+      const ev = state.events.find(x => x.id === state.view.id);
+      if (!ev) return;
+      const n = bulkMarkPaid(ev, [...bulkSelection]);
+      bulkSelection.clear();
+      persistAndRender();
+      if (n) showToast(`Marked ${n} as paid`); else showToast('Nothing to mark');
+      break;
+    }
+    case 'bulk-toggle-kid': {
+      const ev = state.events.find(x => x.id === state.view.id);
+      if (!ev) return;
+      const n = bulkToggle(ev, [...bulkSelection], 'isKid');
+      bulkSelection.clear();
+      persistAndRender();
+      if (n) showToast(`Toggled kid for ${n}`); else showToast('Nothing selected');
+      break;
+    }
+    case 'bulk-toggle-atRisk': {
+      const ev = state.events.find(x => x.id === state.view.id);
+      if (!ev) return;
+      const n = bulkToggle(ev, [...bulkSelection], 'atRisk');
+      bulkSelection.clear();
+      persistAndRender();
+      if (n) showToast(`Toggled at-risk for ${n}`); else showToast('Nothing selected');
+      break;
+    }
+    case 'bulk-remove': {
+      const ev = state.events.find(x => x.id === state.view.id);
+      if (!ev) return;
+      const affected = [];
+      for (const pid of [...bulkSelection]) {
+        const p = ev.passengers.find(x => x.id === pid);
+        if (p && softDeletePassenger(ev, p)) affected.push(p);
+      }
+      if (affected.length) {
+        logActivity(ev, 'passenger.bulk.removed', { count: affected.length, names: affected.map(p => p.name) });
+      }
+      bulkSelection.clear();
+      persistAndRender();
+      if (affected.length) showMultiUndoToast(ev, affected);
+      break;
+    }
+    case 'bulk-export': {
+      const ev = state.events.find(x => x.id === state.view.id);
+      if (!ev) return;
+      const ids = [...bulkSelection];
+      if (!ids.length) { alert('Select some people first.'); return; }
+      exportRosterCSV(ev, ids);
+      break;
+    }
+
+    case 'import-csv': {
+      const ev = state.events.find(x => x.id === id);
+      if (ev) importCSVModal(ev); break;
+    }
+    case 'commit-import': {
+      const ev = state.events.find(x => x.id === id);
+      if (!ev || !importDraft) return;
+      const chosen = importDraft.rows.filter(r => r.include);
+      if (!chosen.length) { closeModal(); importDraft = null; return; }
+      let next = ev.passengers.reduce((m, p) => Math.max(m, p.listNumber || 0), 0) + 1;
+      const ts = nowISO();
+      const names = [];
+      for (const r of chosen) {
+        ev.passengers.push({
+          id: uid(), listNumber: next++,
+          name: r.name, phone: r.phone || '', email: r.email || '',
+          notes: r.notes || '', isKid: !!r.isKid, atRisk: !!r.atRisk,
+          seatPriceOverride: null,
+          addedAt: ts, updatedAt: ts
+        });
+        names.push(r.name);
+      }
+      ev.updatedAt = ts;
+      markDirty(ev);
+      logActivity(ev, 'passenger.bulk.imported', { count: names.length, names });
+      closeModal(); importDraft = null;
+      persistAndRender();
+      showToast(`Imported ${names.length} passenger${names.length === 1 ? '' : 's'}`);
+      break;
+    }
+
+    case 'new-event':     eventModal(null); break;
+    case 'edit-event':    eventModal(state.events.find(x => x.id === id)); break;
+    case 'delete-event': {
+      const ev = state.events.find(x => x.id === id);
+      if (!ev) return;
+      if (!confirm('Delete this event and all its data?')) return;
+      if (ev.remoteId && window.Cloud?.getUser()) {
+        if (confirm('Also delete the cloud copy? (Cannot be undone.)')) {
+          try { await Cloud.deleteRemote(ev.remoteId); } catch (e) { alert('Cloud delete failed: ' + e.message); }
+        }
+      }
+      state.events = state.events.filter(x => x.id !== id);
+      state.view = { name: 'events' };
+      persistAndRender(); break;
+    }
+
+    case 'new-passenger': {
+      const ev = state.events.find(x => x.id === id);
+      passengerModal(ev, null); break;
+    }
+    case 'open-passenger': {
+      const ev = state.events.find(x => x.id === eid);
+      const p = ev?.passengers.find(x => x.id === id);
+      if (ev && p) passengerDetailModal(ev, p);
+      break;
+    }
+    case 'edit-passenger': {
+      const ev = state.events.find(x => x.id === eid);
+      const p = ev?.passengers.find(x => x.id === id);
+      if (ev && p) passengerModal(ev, p);
+      break;
+    }
+    case 'delete-passenger': {
+      const ev = state.events.find(x => x.id === eid);
+      const p = ev?.passengers.find(x => x.id === id);
+      if (!ev || !p) return;
+      if (!softDeletePassenger(ev, p)) return;
+      logActivity(ev, 'passenger.removed', { name: p.name, pid: p.id });
+      closeModal(); persistAndRender();
+      showUndoToast(ev, p);
+      break;
+    }
+    case 'restore-passenger': {
+      const ev = state.events.find(x => x.id === eid);
+      const p = ev?.passengers.find(x => x.id === id);
+      if (!restorePassenger(ev, p)) return;
+      logActivity(ev, 'passenger.restored', { name: p.name, pid: p.id });
+      clearToast();
+      persistAndRender(); break;
+    }
+    case 'undo-delete': {
+      const ev = state.events.find(x => x.id === eid);
+      const p = ev?.passengers.find(x => x.id === id);
+      if (!restorePassenger(ev, p)) { clearToast(); return; }
+      logActivity(ev, 'passenger.restored', { name: p.name, pid: p.id });
+      persistAndRender();
+      showToast(`Restored ${esc(p.name)}`);
+      break;
+    }
+    case 'undo-delete-many': {
+      const ev = state.events.find(x => x.id === eid);
+      if (!ev) return;
+      const ids = (el.dataset.ids || '').split(',').filter(Boolean);
+      const restored = ids.map(pid => ev.passengers.find(x => x.id === pid)).filter(Boolean);
+      const n = restorePassengers(ev, restored);
+      clearToast();
+      persistAndRender();
+      if (n) showToast(`Restored ${n} people`);
+      break;
+    }
+    case 'toggle-atRisk': {
+      const ev = state.events.find(x => x.id === eid);
+      const p = ev?.passengers.find(x => x.id === id);
+      if (!ev || !p) return;
+      const wasAtRisk = !!p.atRisk;
+      p.atRisk = !p.atRisk;
+      const ts = nowISO();
+      p.updatedAt = ts;
+      if (!Array.isArray(p.editHistory)) p.editHistory = [];
+      p.editHistory.push({ field: 'atRisk', oldValue: wasAtRisk, newValue: p.atRisk, at: ts });
+      ev.updatedAt = ts;
+      markDirty(ev);
+      logActivity(ev, p.atRisk ? 'passenger.atRisk.on' : 'passenger.atRisk.off', { name: p.name });
+      closeModal(); persistAndRender(); break;
+    }
+    case 'quick-pay': {
+      const ev = state.events.find(x => x.id === eid);
+      const p = ev?.passengers.find(x => x.id === id);
+      if (!ev || !p || p.deletedAt) return;
+      paymentModal(ev, null, p.id);
+      break;
+    }
+    case 'dismiss-tip': {
+      if (!state.settings.tipsShown) state.settings.tipsShown = {};
+      state.settings.tipsShown[el.dataset.tip] = true;
+      persistAndRender(); break;
+    }
+
+    case 'record-payment': {
+      const ev = state.events.find(x => x.id === id);
+      if (ev) paymentModal(ev, null, null);
+      break;
+    }
+    case 'record-payment-for': {
+      const ev = state.events.find(x => x.id === eid);
+      if (ev) { closeModal(); setTimeout(() => paymentModal(ev, null, id), 50); }
+      break;
+    }
+    case 'edit-payment': {
+      const ev = state.events.find(x => x.id === eid);
+      const p = ev?.payments.find(x => x.id === id);
+      if (ev && p) paymentModal(ev, p, null);
+      break;
+    }
+
+    case 'new-template':  templateModal(null); break;
+    case 'open-template': state.view = { name: 'template', id }; persistAndRender(); break;
+    case 'edit-template': templateModal(state.templates.find(x => x.id === id)); break;
+    case 'delete-template': {
+      if (!confirm('Delete this template?')) return;
+      state.templates = state.templates.filter(x => x.id !== id);
+      state.view = { name: 'templates' };
+      persistAndRender(); break;
+    }
+    case 'add-item': {
+      const t = state.templates.find(x => x.id === id);
+      if (t) templateItemModal(t, null); break;
+    }
+    case 'edit-item': {
+      const t = state.templates.find(x => x.id === id);
+      const it = t?.items.find(x => x.id === el.dataset.iid);
+      if (t && it) templateItemModal(t, it); break;
+    }
+    case 'delete-item': {
+      const t = state.templates.find(x => x.id === id);
+      if (!t) return;
+      t.items = t.items.filter(x => x.id !== el.dataset.iid);
+      persistAndRender(); break;
+    }
+    case 'move-item': {
+      const t = state.templates.find(x => x.id === id);
+      if (!t) return;
+      const i = t.items.findIndex(x => x.id === el.dataset.iid);
+      const j = i + Number(el.dataset.dir);
+      if (i < 0 || j < 0 || j >= t.items.length) return;
+      [t.items[i], t.items[j]] = [t.items[j], t.items[i]];
+      persistAndRender(); break;
+    }
+    case 'create-from-template': {
+      const t = state.templates.find(x => x.id === id);
+      if (t) createFromTemplateModal(t); break;
+    }
+
+    case 'export-roster':   exportRosterCSV(state.events.find(x => x.id === id)); break;
+    case 'copy-roster': {
+      const ev = state.events.find(x => x.id === id);
+      if (!ev) return;
+      const text = formatRosterText(ev);
+      const ok = await copyToClipboard(text);
+      if (ok) showToast('Roster copied — paste into WhatsApp, SMS or email');
+      else {
+        showModal(`
+          <h2>Copy roster</h2>
+          <div class="muted small" style="margin-bottom:8px">Clipboard is unavailable in this context. Select and copy the text below.</div>
+          <textarea readonly style="width:100%;height:45vh;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;padding:10px;border:1px solid var(--line);border-radius:10px" onclick="this.select()">${esc(text)}</textarea>
+          <div class="row gap mt12"><button class="btn primary" data-act="close-modal">Close</button></div>
+        `);
+      }
+      break;
+    }
+    case 'export-payments': exportPaymentsCSV(state.events.find(x => x.id === id)); break;
+    case 'export-json':     exportEventJSON(state.events.find(x => x.id === id)); break;
+    case 'print-event':     printEvent(state.events.find(x => x.id === id)); break;
+    case 'export-all':      download(`transport-roster-backup-${Date.now()}.json`, JSON.stringify(state, null, 2), 'application/json'); break;
+    case 'import-json':     importJSON(); break;
+    case 'clear-data': {
+      if (!confirm('Erase ALL events, templates and payments on this device?')) return;
+      if (!confirm('This cannot be undone. Continue?')) return;
+      state = defaultState();
+      persistAndRender(); break;
+    }
+
+    case 'sync-event': {
+      const ev = state.events.find(x => x.id === id);
+      if (!ev) return;
+      if (!Cloud.isConfigured()) { alert('Set Supabase URL and anon key in Settings first.'); return; }
+      try {
+        const r = await Cloud.syncEvent(ev);
+        persistAndRender();
+        if (r === 'pulled') alert('Pulled latest from cloud.');
+      } catch (e) {
+        if (e.name === 'ConflictError') conflictModal(ev);
+        else alert('Sync failed: ' + e.message);
+      }
+      break;
+    }
+    case 'sync-now': scheduleSyncFlush(0); break;
+    case 'reload-app': {
+      if (!navigator.serviceWorker?.controller) { location.reload(); break; }
+      try {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg?.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          // Fallback: if SKIP_WAITING didn't cause a reload within 2s, force one
+          setTimeout(() => { if (!reloading) location.reload(); }, 2000);
+        } else {
+          location.reload();
+        }
+      } catch (_) { location.reload(); }
+      break;
+    }
+    case 'install-app': {
+      if (!deferredInstallPrompt) {
+        alert('Installation not available right now.\n\nIf the app is already installed, look for it on your home screen. Otherwise try again in a browser that supports PWA installation (Chrome, Edge, Safari).');
+        return;
+      }
+      deferredInstallPrompt.prompt();
+      try {
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+          deferredInstallPrompt = null;
+          showToast('App installed');
+          persistAndRender();
+        }
+      } catch (_) {}
+      break;
+    }
+    case 'dismiss-install': {
+      installBannerDismissed = true;
+      state.settings.installBannerDismissed = true;
+      persistAndRender();
+      break;
+    }
+    case 'share-event': {
+      const ev = state.events.find(x => x.id === id);
+      if (ev) shareModal(ev);
+      break;
+    }
+    case 'revoke-share': {
+      const slug = el.dataset.slug;
+      if (!slug) return;
+      if (!confirm('Revoke this share link? Anyone using it will lose access on their next sync.')) return;
+      const ev = state.view.name === 'event' ? state.events.find(x => x.id === state.view.id) : null;
+      try {
+        await Cloud.revokeShare(slug);
+        if (ev) { logActivity(ev, 'share.revoked', { slug }); await loadShares(ev); }
+        showToast('Share revoked');
+      } catch (e) { alert('Revoke failed: ' + e.message); }
+      break;
+    }
+
+    case 'conflict-pull': {
+      const ev = state.events.find(x => x.id === id);
+      try { await Cloud.pullEvent(ev); closeModal(); persistAndRender(); alert('Pulled remote.'); }
+      catch (e) { alert('Pull failed: ' + e.message); }
+      break;
+    }
+    case 'conflict-merge': {
+      const ev = state.events.find(x => x.id === id);
+      try { await Cloud.mergeRemote(ev); closeModal(); persistAndRender(); alert('Merged and pushed.'); }
+      catch (e) {
+        if (e.name === 'ConflictError') { closeModal(); conflictModal(ev); }
+        else alert('Merge failed: ' + e.message);
+      }
+      break;
+    }
+    case 'conflict-force': {
+      const ev = state.events.find(x => x.id === id);
+      if (!confirm('Overwrite the remote copy with your local version? Any changes made by others will be lost.')) return;
+      try { await Cloud.forcePushEvent(ev); closeModal(); persistAndRender(); alert('Force-pushed.'); }
+      catch (e) { alert('Force push failed: ' + e.message); }
+      break;
+    }
+
+    case 'sb-save': {
+      state.settings.supabase = { url: val('sb_url').trim(), anonKey: val('sb_key').trim() };
+      save(); alert('Keys saved.'); persistAndRender(); break;
+    }
+    case 'sb-signin': {
+      if (!Cloud.isConfigured()) { alert('Save keys first.'); return; }
+      const email = prompt('Email for magic link:');
+      if (!email) return;
+      try { await Cloud.signInWithEmail(email); alert('Check your email for the sign-in link.'); }
+      catch (e) { alert(e.message); }
+      break;
+    }
+    case 'sb-signout': {
+      try { await Cloud.signOut(); alert('Signed out.'); persistAndRender(); } catch (e) { alert(e.message); }
+      break;
+    }
+
+    case 'close-modal': closeModal(); break;
+  }
+});
+
+document.addEventListener('change', e => {
+  const cur = e.target.closest('[data-act="set-currency"]');
+  if (cur) { state.settings.currency = cur.value; persistAndRender(); return; }
+  const sort = e.target.closest('[data-act="sort"]');
+  if (sort) { state.settings.rosterSort = sort.value; save(); render(); return; }
+});
+
+/* ============================================================
+   Network / visibility listeners
+   ============================================================ */
+window.addEventListener('online',  () => { updateSyncIndicator(); scheduleSyncFlush(100); });
+window.addEventListener('offline', () => updateSyncIndicator());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    updateSyncIndicator();
+    if (window.Cloud?.getUser()) scheduleSyncFlush(300);
+  }
+});
+setInterval(() => {
+  if (!navigator.onLine || !window.Cloud?.getUser()) return;
+  const hasDirty  = state.events.some(e => e.syncState === 'dirty' && e.myRole !== 'viewer');
+  const hasViewer = state.events.some(e => e.myRole === 'viewer');
+  if (hasDirty || hasViewer) flushQueue();
+}, 30000);
+
+/* ============================================================
+   Boot
+   ============================================================ */
+
+/* ---------- Install prompt state (needed by views) ---------- */
+let deferredInstallPrompt = null;
+let installBannerDismissed = state.settings.installBannerDismissed === true;
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+}
+function canShowInstallButton() {
+  return !isStandalone() && !!deferredInstallPrompt;
+}
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (state.view.name === 'events' && !installBannerDismissed) persistAndRender();
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  showToast('App installed');
+  persistAndRender();
+});
+
+/* ---------- Apple touch icon (iOS home screen) ---------- */
+(function injectAppleTouchIcon() {
+  if (document.querySelector('link[rel="apple-touch-icon"]')) return;
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 180; canvas.height = 180;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#0b6bcb';
+    ctx.fillRect(0, 0, 180, 180);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 84px -apple-system, Segoe UI, Roboto, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('TR', 90, 96);
+    const link = document.createElement('link');
+    link.rel = 'apple-touch-icon';
+    link.href = canvas.toDataURL('image/png');
+    document.head.appendChild(link);
+  } catch (_) {}
+})();
+
+/* ---------- First render ---------- */
+render();
+if (window.Cloud) updateSyncIndicator();
+
+/* ---------- Service worker: update management ---------- */
+let lastUpdateOffer = 0;
+let reloading = false;
+
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    const hadControllerOnBoot = !!navigator.serviceWorker.controller;
+
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      if (reg.waiting && hadControllerOnBoot) offerReload();
+
+      reg.addEventListener('updatefound', () => {
+        const installing = reg.installing;
+        if (!installing) return;
+        installing.addEventListener('statechange', () => {
+          if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+            offerReload();
+          }
+        });
+      });
+
+      checkForUpdate(reg);
+    }).catch(err => console.warn('SW failed', err));
+
+    // Only reload when we had a controller before (i.e. user tapped Reload)
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadControllerOnBoot) return;
+      if (reloading) return;
+      reloading = true;
+      location.reload();
+    });
+  });
+}
+
+async function checkForUpdate(reg) {
+  try {
+    if (!('serviceWorker' in navigator)) return;
+    const r = reg || await navigator.serviceWorker.getRegistration();
+    if (!r) return;
+    await r.update();
+    if (r.waiting) offerReload();
+  } catch (_) {}
+}
+
+function offerReload() {
+  const now = Date.now();
+  // Re-offer at most every 5 minutes
+  if (now - lastUpdateOffer < 5 * 60 * 1000) return;
+  lastUpdateOffer = now;
+  showToast(`<span>New version available</span>
+    <button data-act="reload-app">Reload</button>`);
+}
+
+// Re-check on tab focus, on reconnect, and every 15 minutes while visible
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') checkForUpdate();
+});
+window.addEventListener('online', () => checkForUpdate());
+setInterval(() => {
+  if (document.visibilityState === 'visible') checkForUpdate();
+}, 15 * 60 * 1000);
+
+/* ---------- PWA shortcuts ---------- */
+(function handleShortcuts() {
+  const p = new URLSearchParams(location.search);
+  const action = p.get('action');
+  if (!action) return;
+  history.replaceState({}, '', location.pathname);
+  if (action === 'new-event') {
+    setTimeout(() => eventModal(null), 200);
+  } else if (action === 'templates') {
+    state.view = { name: 'templates' };
+    persistAndRender();
+  }
+})();
+
+/* ---------- Storage persistence ---------- */
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist().catch(() => {});
+}
+</script>
+<script src="sync.js"></script>
+</body>
+</html>
